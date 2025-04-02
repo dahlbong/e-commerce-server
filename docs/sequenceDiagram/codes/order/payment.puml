@@ -1,0 +1,73 @@
+@startuml
+title 이커머스 결제 처리 시퀀스 다이어그램 (개선 버전)
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "PaymentController" as API
+participant "PaymentService" as Payment
+participant "WalletService" as Wallet
+participant "OrderService" as Order
+participant "InventoryService" as Inventory
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 토큰 유효
+    Auth --> Client : userId 저장 (RequestContext)
+else 토큰 무효
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : initiatePayment(userId, orderId)
+
+API -> Order : getOrderDetails(orderId)
+Order -> Database : SELECT * FROM orders, order_items
+Database --> Order : 주문 정보 반환
+Order --> API : 주문 정보 전달
+
+API -> Wallet : getWalletBalance(userId)
+Wallet -> Database : SELECT * FROM user_wallets WHERE user_id = ?
+Database --> Wallet : wallet balance 반환
+Wallet --> API : 잔액 정보 전달
+
+alt 잔액 부족
+    API --> Client : 결제 실패 - insufficient balance
+    return
+end
+
+API -> Payment : initiatePayment(userId, orderId)
+
+== beginTransaction ==
+Payment -> Database : beginTransaction
+
+Payment -> Wallet : deductBalance(userId, amount)
+Wallet -> Database : UPDATE user_wallets SET balance = balance - ?
+Wallet -> Database : INSERT INTO wallet_transactions(...)
+Wallet --> Payment : 잔액 차감 완료
+
+Payment -> Order : updateOrderStatus(orderId, 'PAYMENT_PENDING')
+Order -> Database : UPDATE orders SET status = 'PAYMENT_PENDING'
+Order --> Payment : 상태 업데이트 완료
+
+Payment -> Inventory : reserveInventory(orderItems)
+Inventory -> Database : UPDATE product_variants SET stock = stock - ?
+Inventory --> Payment : 재고 예약 완료
+
+Payment -> Database : INSERT INTO payments (...)
+
+Payment -> Database : commitTransaction
+== endTransaction ==
+
+Payment --> API : 결제 성공
+API --> Client : 결제 완료 (결제 ID, 주문 ID, 금액 등)
+
+alt 예외 발생 (재고 부족 등)
+    Payment -> Database : rollbackTransaction
+    Payment --> API : 결제 실패 (예: 재고 부족)
+    API --> Client : 결제 실패 응답
+end
+
+@enduml

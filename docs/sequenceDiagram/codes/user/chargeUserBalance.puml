@@ -1,0 +1,48 @@
+@startuml
+title 유저 지갑 잔액 충전 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "WalletController" as API
+participant "WalletService" as Wallet
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : POST /wallets/charge\n(userId, amount)
+
+API -> Wallet : chargeWallet(userId, amount)
+
+== beginTransaction ==
+Wallet -> Database : Acquire Lock for userId
+Database --> Wallet : Lock Acquired / Failed
+
+alt 락 획득 실패
+    Wallet --> API : 충전 실패 (락 점유 중)
+    API --> Client : 충전 실패 응답
+    return
+end
+
+Wallet -> Database : UPDATE user_wallets SET balance = balance + ? WHERE user_id = ?
+Database --> Wallet : 잔액 증가 완료
+
+Wallet -> Database : INSERT INTO wallet_transactions (..., type='CHARGE', amount, user_id)
+Database --> Wallet : 거래 이력 저장 완료
+
+Wallet -> Database : Release Lock
+Wallet -> Database : COMMIT
+== endTransaction ==
+
+Wallet --> API : 충전 성공 응답 (충전 후 잔액 등)
+API --> Client : 충전 성공 응답
+
+@enduml

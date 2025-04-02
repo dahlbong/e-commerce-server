@@ -1,0 +1,20 @@
+@startuml
+title 인기상품 산출 스케줄러 시퀀스 다이어그램
+
+participant "Scheduler (Batch)" as Scheduler
+participant "ProductService" as Product
+participant Database
+participant "Cache" as Cache
+
+Scheduler -> Product : calculateTopSellingProducts(recentDays = x)
+
+Product -> Database : SELECT product_id, COUNT(*)\nFROM order_items\nWHERE created_at >= NOW() - INTERVAL x DAY\nGROUP BY product_id\nORDER BY count DESC LIMIT n
+Database --> Product : 판매 수량 상위 n개 상품 ID
+
+Product -> Database : SELECT * FROM products WHERE product_id IN (...)
+Database --> Product : 상품 상세 정보 반환
+
+Product -> Cache : SET top_n_products = [상품정보 목록]\n(expire: m시간)
+Cache --> Product : 캐시 저장 완료
+
+@enduml

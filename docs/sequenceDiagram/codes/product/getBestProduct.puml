@@ -1,0 +1,39 @@
+@startuml
+title 인기상품 조회 시퀀스 다이어그램 (클라이언트 요청 처리)
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "ProductController" as API
+participant "ProductService" as Product
+participant "Redis Cache" as Cache
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : GET /products/popular?limit=5
+
+API -> Product : getTopProducts(limit = 5)
+
+Product -> Cache : GET top_5_products
+alt 캐시 HIT
+    Cache --> Product : 캐시된 인기상품 목록
+    Product --> API : 인기상품 목록 반환
+    API --> Client : 인기상품 응답 (상품명, 썸네일, 가격 등)
+else 캐시 MISS
+    Product -> Database : Fallback - 인기상품 직접 조회 (order_items + products JOIN)
+    Database --> Product : 인기상품 데이터 반환
+    Product --> Cache : 캐시 세팅 (expire: 1시간)
+    Product --> API : 인기상품 목록 반환
+    API --> Client : 인기상품 응답
+end
+
+@enduml

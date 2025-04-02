@@ -1,0 +1,44 @@
+@startuml
+title 장바구니 상품 수량 변경 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "CartController" as API
+participant "CartService" as Cart
+participant "ProductService" as Product
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 토큰 유효
+    Auth --> Client : userId 저장 (RequestContext)
+else 토큰 무효
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : PATCH /cart/items\n(productId, variantId, quantity)
+
+API -> Cart : updateCartItemQuantity(userId, productId, variantId, quantity)
+
+Cart -> Product : checkProductAvailability(productId, variantId, quantity)
+Product -> Database : SELECT * FROM product_variants\nWHERE product_id = ? AND variant_id = ?
+Database --> Product : 상품 상태 및 재고 정보 반환
+
+alt 재고 충분 & 판매중
+    Product --> Cart : 재고 확인 성공
+
+    Cart -> Database : UPDATE cart_items SET quantity = ?\nWHERE user_id = ? AND product_id = ? AND variant_id = ?
+    Database --> Cart : 수량 변경 완료
+
+    Cart --> API : 변경된 장바구니 항목 반환
+    API --> Client : 수량 변경 성공 응답
+else 재고 부족 또는 판매 불가
+    Product --> Cart : 재고 부족 또는 판매불가 응답
+    Cart --> API : 수량 변경 실패 (재고 부족 또는 판매 중지)
+    API --> Client : 수량 변경 실패 응답 (에러 메시지 포함)
+end
+
+@enduml
