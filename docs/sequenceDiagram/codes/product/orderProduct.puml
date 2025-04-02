@@ -1,0 +1,67 @@
+@startuml
+title 상품 주문 생성 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "OrderController" as API
+participant "OrderService" as Order
+participant "ProductService" as Product
+participant "CouponService" as Coupon
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : createOrder(userId, productId, quantity, variantId, couponId?)
+
+API -> Order : initiateOrder(userId, productId, variantId, quantity, couponId?)
+
+Order -> Product : validateProductAvailability(productId, variantId, quantity)
+Product -> Database : SELECT stock, status FROM product_variants WHERE variant_id = ?
+Database --> Product : 재고 및 판매 상태 반환
+Product --> Order : 재고 상태 응답
+
+alt 재고 부족
+    Order --> API : 주문 실패 (재고 부족)
+    API --> Client : 주문 실패 응답\n(재고 부족 메시지)
+    return
+end
+
+opt 쿠폰이 입력된 경우
+    Order -> Coupon : validateCoupon(userId, couponId)
+    Coupon -> Database : SELECT * FROM user_coupons WHERE user_id = ? AND coupon_id = ?
+    Database --> Coupon : 쿠폰 정보 반환
+
+    alt 쿠폰 무효
+        Coupon --> Order : 쿠폰 유효성 실패
+        Order --> API : 주문 실패 (쿠폰 오류)
+        API --> Client : 주문 실패 응답\n(쿠폰 사용 불가 메시지)
+        return
+    end
+end
+
+== beginTransaction ==
+Order -> Database : BEGIN TRANSACTION
+
+Order -> Database : INSERT INTO orders (...)
+Order -> Database : INSERT INTO order_items (...)
+
+opt 쿠폰 사용 시
+    Coupon -> Database : UPDATE user_coupons SET status = 'USED' WHERE coupon_id = ?
+end
+
+Order -> Database : COMMIT TRANSACTION
+== endTransaction ==
+
+Order --> API : 주문 생성 성공 (orderId, totalAmount, discount, etc.)
+API --> Client : 결제 진행 응답
+
+@enduml

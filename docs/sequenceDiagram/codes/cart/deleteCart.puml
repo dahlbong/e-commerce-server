@@ -1,0 +1,38 @@
+@startuml
+title 장바구니 전체 항목 삭제 (비우기) 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "CartController" as API
+participant "CartService" as Cart
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 토큰 유효
+    Auth --> Client : userId 저장 (RequestContext)
+else 토큰 무효
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : DELETE /cart/items\n(전체 삭제 요청)
+
+API -> Cart : clearCart(userId)
+
+Cart -> Database : SELECT COUNT(*) FROM cart_items WHERE user_id = ?
+Database --> Cart : 장바구니 항목 개수 반환
+
+alt 항목이 존재하는 경우
+    Cart -> Database : DELETE FROM cart_items WHERE user_id = ?
+    Database --> Cart : 삭제 완료
+    Cart --> API : 삭제 성공
+    API --> Client : 장바구니 비우기 성공 응답
+else 장바구니가 이미 비어있는 경우
+    Cart --> API : 삭제 실패 (비어 있음)
+    API --> Client : 장바구니가 비어 있음 메시지 응답
+end
+
+@enduml

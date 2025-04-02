@@ -1,0 +1,69 @@
+@startuml
+title 장바구니 상품 주문 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "OrderController" as API
+participant "OrderService" as Order
+participant "CartService" as Cart
+participant "ProductService" as Product
+participant "CouponService" as Coupon
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 토큰 무효
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : POST /orders/from-cart\n(userId, couponId?)
+
+API -> Order : createOrderFromCart(userId, couponId)
+
+Order -> Cart : getUserCartItems(userId)
+Cart -> Database : SELECT * FROM cart_items WHERE user_id = ?
+Database --> Cart : 장바구니 상품 목록 반환
+Cart --> Order : 장바구니 상품 전달
+
+Order -> Product : validateProductStock(productId, variantId, quantity)
+Product -> Database : SELECT * FROM product_variants WHERE product_id = ? AND variant_id = ?
+Database --> Product : 재고 및 판매 상태 정보 반환
+Product --> Order : 유효한 재고 여부 반환
+
+opt 쿠폰이 입력된 경우
+    Order -> Coupon : validateUserCoupon(userId, couponId)
+    Coupon -> Database : SELECT * FROM user_coupons WHERE user_id = ? AND coupon_id = ?
+    Database --> Coupon : 쿠폰 정보 반환
+
+    alt 쿠폰 무효 (만료 or 이미 사용됨 등)
+        Coupon --> Order : 쿠폰 유효성 실패
+        Order --> API : 주문 생성 실패 (쿠폰 오류)
+        API --> Client : 주문 실패 응답 (쿠폰 사용 불가 메시지)
+        return
+    end
+end
+
+== beginTransaction ==
+Order -> Database : INSERT INTO orders (...)
+Order -> Database : INSERT INTO order_items (...)
+
+opt 쿠폰 사용 시
+    Coupon -> Database : UPDATE user_coupons SET status = 'USED' WHERE user_id = ? AND coupon_id = ?
+end
+
+Order -> Cart : deleteUserCartItems(userId)
+Cart -> Database : DELETE FROM cart_items WHERE user_id = ?
+Database --> Cart : 장바구니 삭제 완료
+
+Order -> Database : COMMIT
+== endTransaction ==
+
+Order --> API : 주문 생성 완료 (orderId, totalAmount)
+API --> Client : 결제 진행 응답
+
+@enduml

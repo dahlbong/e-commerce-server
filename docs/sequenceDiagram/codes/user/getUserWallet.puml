@@ -1,0 +1,30 @@
+@startuml
+title 유저 지갑 잔액 조회 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "API Gateway" as API
+participant "WalletService" as Wallet
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : GET /wallets/balance
+
+API -> Wallet : getWalletBalance(userId)
+Wallet -> Database : SELECT * FROM user_wallets WHERE user_id = ?
+Database --> Wallet : wallet_balance, last_updated
+Wallet --> API : 유저 지갑 잔액 정보 전달
+
+API --> Client : 현재 지갑 잔액 반환 (balance, currency, lastUpdated 등)
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+title 장바구니 조회 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "CartController" as API
+participant "CartService" as Cart
+participant "ProductService" as Product
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : GET /cart/items
+
+API -> Cart : getCartItems(userId)
+
+Cart -> Database : SELECT * FROM cart_items WHERE user_id = ?
+Database --> Cart : 장바구니 상품 목록 반환
+
+Cart -> Product : getProductDetails(productId, variantId) for each item
+Product -> Database : SELECT * FROM products, product_variants\nWHERE product_id = ? AND variant_id = ?
+Database --> Product : 상품 정보 (이름, 옵션, 가격, 재고 등)
+Product --> Cart : 상품 상세 정보 반환
+
+Cart --> API : 장바구니 상품 + 상세 정보 목록 전달
+API --> Client : 장바구니 조회 결과 응답\n(상품, 수량, 가격, 재고 포함)
+
+@enduml
