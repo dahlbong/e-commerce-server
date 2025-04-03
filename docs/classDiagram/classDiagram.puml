@@ -1,183 +1,146 @@
 @startuml
-title 이커머스 서비스 클래스 다이어그램
+package "User" {
+  class User {
+    -id: Long
+    -name: String
+    -point: Point
+    +chargePoint(amount: BigDecimal): void
+    +usePoint(amount: BigDecimal): void
+  }
 
-' 사용자 관련 클래스
-class User {
-  +userId: UUID
-  +email: String
-  +name: String
-  +phoneNumber: String
-  +address: String
-  +isActive: Boolean
-  +updateProfile(name: String, phoneNumber: String, address: String): void
-  +deactivate(): void
-  +reactivate(): void
+  class Point {
+    -balance: BigDecimal
+    +add(amount: BigDecimal): void
+    +deduct(amount: BigDecimal): void
+  }
+
+  class PointHistory {
+    -type: PointHistoryType
+    -amount: BigDecimal
+    -beforeBalance: BigDecimal
+    -afterBalance: BigDecimal
+  }
+
+  enum PointHistoryType {
+    CHARGE
+    USE
+  }
+
+  User --> "*" PointHistory : logs >
 }
 
-class Wallet {
-  +walletId: UUID
-  +balance: Double
-  +deposit(amount: Double): void
-  +withdraw(amount: Double): Boolean
-  +hasEnoughBalance(amount: Double): Boolean
+package "Product" {
+  class Product {
+    -id: Long
+    -name: String
+    -price: BigDecimal
+    -status: SellingStatus
+    -stock: ProductStock
+    +isAvailable(): boolean
+    +sell(quantity: int): void
+  }
+
+  class ProductStock {
+    -quantity: int
+    +increase(amount: int): void
+    +decrease(amount: int): void
+  }
+
+  enum SellingStatus {
+    SELLING
+    STOPPED
+  }
+
+  Product --> "1" ProductStock : manages >
 }
 
-class Transaction {
-  +transactionId: UUID
-  +amount: Double
-  +type: TransactionType
-  +date: DateTime
-  +description: String
-  +isDeposit(): Boolean
-  +isWithdrawal(): Boolean
+package "Coupon" {
+  class Coupon {
+    -name: String
+    -discountType: DiscountType
+    -discountAmount: BigDecimal
+    -validPeriod: Period
+    -remainCapacity: int
+    +issueTo(User): IssuedCoupon
+    +isValid(): boolean
+  }
+
+  class IssuedCoupon {
+    -status: IssuedCouponStatus
+    +isUsable(): boolean
+    +apply(amount: BigDecimal): BigDecimal
+  }
+
+  enum DiscountType {
+    PERCENTAGE
+    FIXED_AMOUNT
+  }
+
+  enum IssuedCouponStatus {
+    USED
+    UNUSED
+    EXPIRED
+  }
+
+  class Period {
+    -start: DateTime
+    -end: DateTime
+    +isInPeriod(): boolean
+  }
+
+  Coupon --> "*" IssuedCoupon : issues >
+  IssuedCoupon --> "1" Coupon : from >
 }
 
-' 상품 관련 클래스
-class Product {
-  +productId: UUID
-  +name: String
-  +description: String
-  +basePrice: Double
-  +category: String
-  +isActive: Boolean
-  +updateDetails(name: String, description: String, price: Double): void
-  +updateCategory(category: String): void
-  +activate(): void
-  +deactivate(): void
+package "Order" {
+  class Order {
+    -status: OrderStatus
+    -details: List<OrderDetail>
+    -payment: Payment
+    +addProduct(Product, quantity): void
+    +complete(): void
+  }
+
+  class OrderDetail {
+    -product: Product
+    -quantity: int
+    -unitPrice: BigDecimal
+    +getSubtotal(): BigDecimal
+  }
+
+  class Payment {
+    -status: PaymentStatus
+    -totalAmount: BigDecimal
+    -discount: BigDecimal
+    -finalAmount: BigDecimal
+    +applyCoupon(IssuedCoupon): void
+  }
+
+  enum OrderStatus {
+    PENDING
+    COMPLETED
+    CANCELED
+  }
+
+  enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+  }
+
+  Order --> "*" OrderDetail : contains >
+  Order --> "1" Payment : pays >
 }
 
-class ProductVariant {
-  +variantId: UUID
-  +optionName: String
-  +additionalPrice: Double
-  +stock: Integer
-  +updateStock(quantity: Integer): void
-  +isInStock(): Boolean
-  +calculatePrice(basePrice: Double): Double
+package "Infra" {
+  class DistributedLock {
+    -key: String
+    -owner: String
+    -lockedAt: DateTime
+    -expiresAt: DateTime
+    +isExpired(): boolean
+    +extend(): void
+    +release(): void
+  }
 }
-
-class ProductImage {
-  +imageId: UUID
-  +imageUrl: String
-  +sequence: Integer
-}
-
-' 장바구니 관련 클래스
-class Cart {
-  +cartId: UUID
-  +createdAt: DateTime
-  +updatedAt: DateTime
-  +addItem(item: CartItem): void
-  +removeItem(item: CartItem): void
-  +updateItemQuantity(item: CartItem, quantity: Integer): void
-  +clear(): void
-  +calculateTotal(): Double
-  +isEmpty(): Boolean
-  +checkout(): Order
-}
-
-class CartItem {
-  +cartItemId: UUID
-  +product: Product
-  +variant: ProductVariant
-  +quantity: Integer
-  +updateQuantity(quantity: Integer): void
-  +calculateSubtotal(): Double
-  +isAvailable(): Boolean
-}
-
-' 주문 관련 클래스
-class Order {
-  +orderId: UUID
-  +status: OrderStatus
-  +shippingAddress: String
-  +totalAmount: Double
-  +discountAmount: Double
-  +finalAmount: Double
-  +createdAt: DateTime
-  +updatedAt: DateTime
-  +coupon: UserCoupon
-  +addItem(item: OrderItem): void
-  +calculateAmounts(): void
-  +applyDiscount(amount: Double): void
-  +updateStatus(status: OrderStatus): void
-  +cancel(): Boolean
-  +isPaid(): Boolean
-  +isShipped(): Boolean
-  +isDelivered(): Boolean
-}
-
-class OrderItem {
-  +orderItemId: UUID
-  +product: Product
-  +variant: ProductVariant
-  +quantity: Integer
-  +unitPrice: Double
-  +calculateSubtotal(): Double
-}
-
-' 결제 관련 클래스
-class Payment {
-  +paymentId: UUID
-  +amount: Double
-  +method: String
-  +status: PaymentStatus
-  +transactionId: String
-  +paymentDate: DateTime
-  +process(): Boolean
-  +verify(): Boolean
-  +refund(): Boolean
-  +isSuccessful(): Boolean
-}
-
-' 쿠폰 관련 클래스
-class Coupon {
-  +couponId: UUID
-  +code: String
-  +discountAmount: Double
-  +discountPercentage: Double
-  +minOrderAmount: Double
-  +startDate: DateTime
-  +endDate: DateTime
-  +isActive: Boolean
-  +calculateDiscount(orderAmount: Double): Double
-  +isValid(): Boolean
-  +isExpired(): Boolean
-  +isApplicable(orderAmount: Double): Boolean
-}
-
-class UserCoupon {
-  +userCouponId: UUID
-  +coupon: Coupon
-  +isUsed: Boolean
-  +usedDate: DateTime
-  +issueDate: DateTime
-  +use(): void
-  +canBeUsed(): Boolean
-}
-
-' 관계 정의
-User "1" -- "0..1" Wallet : 보유
-User "1" -- "0..1" Cart : 소유
-User "1" -- "*" Order : 주문
-User "1" -- "*" UserCoupon : 쿠폰보유
-
-Wallet "1" -- "*" Transaction : 기록
-Wallet "0..1" -- "*" Payment : 처리
-
-Product "1" -- "*" ProductVariant : 옵션
-Product "1" -- "*" ProductImage : 이미지
-
-Cart "1" -- "*" CartItem : 포함
-CartItem "*" -- "1" Product : 선택
-CartItem "*" -- "0..1" ProductVariant : 옵션
-
-Order "1" -- "*" OrderItem : 포함
-Order "1" -- "*" Payment : 결제
-Order "0..1" -- "1" UserCoupon : 쿠폰적용
-OrderItem "*" -- "1" Product : 상품
-OrderItem "*" -- "0..1" ProductVariant : 옵션
-
-UserCoupon "*" -- "1" Coupon : 원본쿠폰
-
 @enduml
