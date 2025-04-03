@@ -2,6 +2,7 @@ package kr.hhplus.be.server.api.controller;
 
 
 import kr.hhplus.be.server.api.dto.ProductRequest;
+import kr.hhplus.be.server.domain.model.PopularProduct;
 import kr.hhplus.be.server.domain.model.Product;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,11 @@ public class ProductController {
     private static List<Product> products = new ArrayList<>(Arrays.asList(
             new Product(1, "Product A", 100.0, 10),
             new Product(2, "Product B", 200.0, 5)
+    ));
+    // 더미 데이터: 인기 판매 상품 목록
+    private static List<PopularProduct> popularProducts = new ArrayList<>(Arrays.asList(
+            new PopularProduct(1, "Product A", 50, 5000.0),
+            new PopularProduct(2, "Product B", 30, 6000.0)
     ));
 
     // 모든 상품 조회
@@ -45,4 +51,11 @@ public class ProductController {
         products.add(newProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
     }
+
+    // 인기 판매 상품 조회 API 추가
+    @GetMapping("/popular")
+    public ResponseEntity<List<PopularProduct>> getPopularProducts() {
+        return ResponseEntity.ok(popularProducts);
+    }
+
 }
