@@ -8,7 +8,9 @@ public enum ProductErrorCode implements ErrorCode {
 
     STOCK_SHOULD_NOT_BE_NEGATIVE("초기 재고는 0 이상이어야 합니다."),
     DECREASE_AMOUNT_SHOULD_BE_POSITIVE("재고 감소 수량은 0보다 커야합니다."),
-    OUT_OF_STOCK("재고가 부족합니다.");
+    OUT_OF_STOCK("재고가 부족합니다."),
+    INCREASE_AMOUNT_SHOULD_BE_POSITIVE("재고 추가 수량은 0보다 커야합니다."),
+    PRODUCT_NOT_FOUND("상품을 찾을 수 없습니다.");
 
     private final String message;
     ProductErrorCode(String message) {
