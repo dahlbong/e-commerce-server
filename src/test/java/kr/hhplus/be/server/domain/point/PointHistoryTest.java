@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point;
 
+import kr.hhplus.be.server.domain.point.enums.PointHistoryType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

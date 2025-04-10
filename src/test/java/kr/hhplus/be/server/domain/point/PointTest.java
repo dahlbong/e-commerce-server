@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point;
 
+import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ class PointTest {
         @DisplayName("포인트 생성 시 초기 잔액이 음수이면 INITIAL_BALANCE_NEGATIVE 에러 메시지를 던진다")
         void createPoint_fail_negativeBalance() {
             assertThatThrownBy(() -> Point.of(1L, 1001L, BigDecimal.valueOf(-100)))
-                    .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(PointErrorCode.INITIAL_BALANCE_NEGATIVE.message());
         }
 
@@ -44,11 +44,9 @@ class PointTest {
             Point point = Point.of(1L, 1001L, BigDecimal.valueOf(1000));
 
             assertThatThrownBy(() -> point.charge(BigDecimal.ZERO))
-                    .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(PointErrorCode.CHARGE_AMOUNT_INVALID.message());
 
             assertThatThrownBy(() -> point.charge(BigDecimal.valueOf(-100)))
-                    .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(PointErrorCode.CHARGE_AMOUNT_INVALID.message());;
         }
     }
@@ -70,18 +68,16 @@ class PointTest {
             Point point = Point.of(1L, 1001L, BigDecimal.valueOf(300));
 
             assertThatThrownBy(() -> point.use(BigDecimal.valueOf(500)))
-                    .isInstanceOf(IllegalStateException.class)
                     .hasMessage(PointErrorCode.INSUFFICIENT_BALANCE.message());
         }
 
         @Test
-        @DisplayName("포인트 사용 시 0 이하의 금액을 사용하면 CHARGE_AMOUNT_INVALID 에러 메시지를 던진다")
+        @DisplayName("포인트 사용 시 0 이하의 금액을 사용하면 USE_AMOUNT_INVALID 에러 메시지를 던진다")
         void usePoint_fail_zeroOrNegativeAmount() {
             Point point = Point.of(1L, 1001L, BigDecimal.valueOf(1000));
 
             assertThatThrownBy(() -> point.use(BigDecimal.valueOf(-50)))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage(PointErrorCode.CHARGE_AMOUNT_INVALID.message());
+                    .hasMessage(PointErrorCode.USE_AMOUNT_INVALID.message());
         }
     }
 

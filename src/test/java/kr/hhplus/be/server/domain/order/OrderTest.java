@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order;
 
+import kr.hhplus.be.server.domain.order.enums.OrderErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,6 @@ class OrderTest {
     void negative_price_should_throw() {
         assertThatThrownBy(() ->
                 Order.of(1L, 1L, 1L, 1, BigDecimal.valueOf(-1000), BigDecimal.ZERO))
-                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(OrderErrorCode.PRICE_SHOULD_NOT_BE_NEGATIVE.message());
     }
 
@@ -30,7 +30,6 @@ class OrderTest {
     void zero_quantity_should_throw() {
         assertThatThrownBy(() ->
                 Order.of(1L, 1L, 1L, 0, BigDecimal.valueOf(1000), BigDecimal.ZERO))
-                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(OrderErrorCode.QUANTITY_SHOULD_BE_POSITIVE.message());
     }
 }

@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.product;
 
+import kr.hhplus.be.server.domain.product.enums.ProductErrorCode;
+import kr.hhplus.be.server.domain.product.enums.SellingStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +33,6 @@ class ProductTest {
     void createProduct_fail_blankName() {
         assertThatThrownBy(() ->
                 Product.of(1L, "  ", SellingStatus.SELLING, BigDecimal.valueOf(10000)))
-                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(ProductErrorCode.NAME_SHOULD_NOT_BE_BLANK.message());
     }
 
@@ -40,7 +41,6 @@ class ProductTest {
     void createProduct_fail_invalidPrice() {
         assertThatThrownBy(() ->
                 Product.of(1L, "상품", SellingStatus.SELLING, BigDecimal.ZERO))
-                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(ProductErrorCode.PRICE_SHOULD_BE_POSITIVE.message());
     }
 

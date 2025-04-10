@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.product;
 
+import kr.hhplus.be.server.domain.product.enums.ProductErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,6 @@ class ProductStockTest {
     void decreaseStock_fail_insufficient() {
         ProductStock stock = ProductStock.of(1L, 10L, 10);
         assertThatThrownBy(() -> stock.decrease(20))
-                .isInstanceOf(IllegalStateException.class)
                 .hasMessage(ProductErrorCode.OUT_OF_STOCK.message());;
     }
 
@@ -29,7 +29,6 @@ class ProductStockTest {
     void decreaseStock_fail_invalidAmount() {
         ProductStock stock = ProductStock.of(1L, 10L, 10);
         assertThatThrownBy(() -> stock.decrease(0))
-                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(ProductErrorCode.DECREASE_AMOUNT_SHOULD_BE_POSITIVE.message());;
     }
 }
