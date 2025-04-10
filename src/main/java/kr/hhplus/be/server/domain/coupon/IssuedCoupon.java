@@ -1,47 +1,98 @@
 package kr.hhplus.be.server.domain.coupon;
 
+import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.coupon.enums.CouponErrorCode;
-import kr.hhplus.be.server.domain.coupon.enums.CouponStatus;
+import kr.hhplus.be.server.domain.coupon.enums.DiscountType;
 import kr.hhplus.be.server.domain.coupon.enums.IssuedCouponStatus;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "issued_coupon")
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class IssuedCoupon {
 
-    private final Long id;
-    private final Long couponId;
-    private final Long userId;
-    private final LocalDateTime issuedAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long userId;
+
+    private String couponName;
+
+    @Enumerated(EnumType.STRING)
+    private DiscountType discountType;
+
+    private BigDecimal discountAmount;
+
+    private LocalDateTime issuedAt;
+
+    private LocalDateTime validStartedAt;
+
+    private LocalDateTime validEndedAt;
+
     private LocalDateTime usedAt;
+
+    @Enumerated(EnumType.STRING)
     private IssuedCouponStatus status;
-    private final LocalDateTime createdAt;
+
+    private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 
-    public static IssuedCoupon of(Coupon coupon, Long userId, Long issuedId) {
+    public static IssuedCoupon of(Coupon coupon, Long userId) {
         LocalDateTime now = LocalDateTime.now();
         return new IssuedCoupon(
-                issuedId, coupon.getId(), userId, now,null, IssuedCouponStatus.UNUSED, now, now
+                userId,
+                coupon.getName(),
+                coupon.getDiscountType(),
+                coupon.getDiscountAmount(),
+                now,
+                coupon.getValidStartedAt(),
+                coupon.getValidEndedAt(),
+                null,
+                IssuedCouponStatus.UNUSED,
+                now,
+                now
         );
     }
 
-    public void use() {
-        if (status == IssuedCouponStatus.USED) {
-            throw new BusinessException(CouponErrorCode.ALREADY_USED);
-        }
-        status = IssuedCouponStatus.USED;
-        usedAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    private IssuedCoupon(Long userId, String couponName, DiscountType discountType,
+                         BigDecimal discountAmount, LocalDateTime issuedAt,
+                         LocalDateTime validStartedAt, LocalDateTime validEndedAt,
+                         LocalDateTime usedAt, IssuedCouponStatus status,
+                         LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.userId = userId;
+        this.couponName = couponName;
+        this.discountType = discountType;
+        this.discountAmount = discountAmount;
+        this.issuedAt = issuedAt;
+        this.validStartedAt = validStartedAt;
+        this.validEndedAt = validEndedAt;
+        this.usedAt = usedAt;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    public boolean isValidNow(Coupon coupon, LocalDateTime now) {
+    public void use() {
+        if (status != IssuedCouponStatus.UNUSED) {
+            throw new BusinessException(CouponErrorCode.ALREADY_USED);
+        }
+        this.status = IssuedCouponStatus.USED;
+        this.usedAt = LocalDateTime.now();
+        this.updatedAt = usedAt;
+    }
+
+    public boolean isValidNow(LocalDateTime now) {
         return status == IssuedCouponStatus.UNUSED &&
-                !now.isBefore(coupon.getValidStartedAt()) &&
-                !now.isAfter(coupon.getValidEndedAt()) &&
-                coupon.getStatus() == CouponStatus.ACTIVE;
+                !now.isBefore(validStartedAt) &&
+                !now.isAfter(validEndedAt);
     }
 }
