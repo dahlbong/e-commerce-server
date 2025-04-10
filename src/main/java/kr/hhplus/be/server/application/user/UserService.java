@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
-
     private final UserRepository userRepository;
 
     public User getOrCreateById(Long id) {
-        User user = userRepository.findById(id);
-        if (user == null) {
-            user = userRepository.save(User.of("임시 이름"));
-        }
-        return user;
+        return userRepository.findOptionalById(id)
+                .orElseGet(() -> userRepository.save(User.of(id, "임시 이름")));
+    }
+
+    public User getById(Long id) {
+        return userRepository.findById(id);
     }
 }

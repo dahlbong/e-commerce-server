@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -22,23 +24,27 @@ class UserServiceTest {
     UserService userService;
 
     @Test
-    @DisplayName("유저 ID로 유저를 조회할 수 있다")
-    void getById_returns_user() {
-        User user = User.of("홍길동");
-        given(userRepository.findById(1L)).willReturn(user);
+    @DisplayName("유저가 존재하면 해당 유저를 반환한다")
+    void getOrCreateById_returns_existing_user() {
+        // given
+        Long userId = 1L;
+        User existingUser = User.of(userId, "기존 유저");
+        given(userRepository.findOptionalById(userId)).willReturn(Optional.of(existingUser));
 
-        User found = userService.getOrCreateById(1L);
+        // when
+        User result = userService.getOrCreateById(userId);
 
-        assertThat(found).isEqualTo(user);
-        assertThat(found.getName()).isEqualTo("홍길동");
+        // then
+        assertThat(result).isEqualTo(existingUser);
+        verify(userRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용자일 경우 새 사용자로 저장한다")
-    void getOrCreateByName_creates_and_saves_if_not_exists() {
+    @DisplayName("유저가 없으면 새 유저를 생성 후 저장한다")
+    void getOrCreateById_creates_new_user_if_not_found() {
         // given
-        Long userId = 123L;
-        given(userRepository.findById(userId)).willReturn(null);
+        Long userId = 2L;
+        given(userRepository.findOptionalById(userId)).willReturn(Optional.empty());
         given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -46,23 +52,24 @@ class UserServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getName()).isEqualTo("임시 이름");
-        verify(userRepository).save(result);
+        assertThat(result.getId()).isEqualTo(userId);
+        assertThat(result.getUsername()).isEqualTo("임시 이름");
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
-    @DisplayName("사용자가 이미 존재하면 새로 저장하지 않는다")
-    void getOrCreateById_returns_existing_user() {
+    @DisplayName("getById는 무조건 유저를 반환한다")
+    void getById_returns_user_directly() {
         // given
-        Long userId = 123L;
-        User existing = User.of("기존 사용자");
-        given(userRepository.findById(userId)).willReturn(existing);
+        Long userId = 3L;
+        User user = User.of(userId, "정상 유저");
+        given(userRepository.findById(userId)).willReturn(user);
 
         // when
-        User result = userService.getOrCreateById(userId);
+        User result = userService.getById(userId);
 
         // then
-        assertThat(result).isEqualTo(existing);
-        verify(userRepository, never()).save(any());
+        assertThat(result).isEqualTo(user);
+        assertThat(result.getUsername()).isEqualTo("정상 유저");
     }
 }

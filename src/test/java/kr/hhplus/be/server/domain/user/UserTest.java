@@ -12,7 +12,7 @@ class UserTest {
     void createUser_success() {
         User user = User.of("홍길동");
 
-        assertThat(user.getName()).isEqualTo("홍길동");
+        assertThat(user.getUsername()).isEqualTo("홍길동");
         assertThat(user.getCreatedAt()).isNotNull();
         assertThat(user.getUpdatedAt()).isNotNull();
     }

@@ -20,22 +20,21 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String username;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    public static User of(String name) {
+    public static User of(Long id, String name) {
         if (name == null || name.isBlank()) {
             throw new BusinessException(UserErrorCode.BLANK_NAME);
         }
         LocalDateTime now = LocalDateTime.now();
-        User user = new User();
-        user.name = name;
-        user.createdAt = now;
-        user.updatedAt = now;
+        return new User(id, name, now, now);
+    }
 
-        return user;
+    public static User of(String name) {
+        return of(null, name);
     }
 }
