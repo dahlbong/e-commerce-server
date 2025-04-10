@@ -1,6 +1,8 @@
-package kr.hhplus.be.server.domain.point;
+package kr.hhplus.be.server.domain.point.enums;
 
-public enum ErrorCode {
+import kr.hhplus.be.server.domain.ErrorCode;
+
+public enum PointErrorCode implements ErrorCode {
 
     INITIAL_BALANCE_NEGATIVE("최초 포인트는 음수일 수 없습니다."),
     CHARGE_AMOUNT_INVALID("충전 금액은 0보다 커야 합니다."),
@@ -9,7 +11,7 @@ public enum ErrorCode {
 
     private final String message;
 
-    ErrorCode(String message) {
+    PointErrorCode(String message) {
         this.message = message;
     }
 

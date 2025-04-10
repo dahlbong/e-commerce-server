@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.point;
 
 import kr.hhplus.be.server.domain.BusinessException;
+import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

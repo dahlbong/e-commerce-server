@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.point;
 
+import kr.hhplus.be.server.domain.point.enums.PointHistoryType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,9 +22,6 @@ public class PointHistory {
 
     public static PointHistory of(Long id, Long userId, PointHistoryType type,
                                   BigDecimal amount, BigDecimal before, BigDecimal after) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("이력 금액은 0보다 커야 합니다.");
-        }
         LocalDateTime now = LocalDateTime.now();
         return new PointHistory(id, userId, type, amount, before, after, now);
     }

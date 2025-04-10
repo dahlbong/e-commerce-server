@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.product;
 
 import kr.hhplus.be.server.domain.BusinessException;
+import kr.hhplus.be.server.domain.product.enums.ProductErrorCode;
+import kr.hhplus.be.server.domain.product.enums.SellingStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
