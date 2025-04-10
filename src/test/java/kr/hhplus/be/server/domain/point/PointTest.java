@@ -26,7 +26,7 @@ class PointTest {
         void createPoint_fail_negativeBalance() {
             assertThatThrownBy(() -> Point.of(1L, 1001L, BigDecimal.valueOf(-100)))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining(ErrorCode.INITIAL_BALANCE_NEGATIVE.message());
+                    .hasMessage(PointErrorCode.INITIAL_BALANCE_NEGATIVE.message());
         }
 
         @Test
@@ -45,10 +45,11 @@ class PointTest {
 
             assertThatThrownBy(() -> point.charge(BigDecimal.ZERO))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining(ErrorCode.CHARGE_AMOUNT_INVALID.message());
+                    .hasMessage(PointErrorCode.CHARGE_AMOUNT_INVALID.message());
 
             assertThatThrownBy(() -> point.charge(BigDecimal.valueOf(-100)))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage(PointErrorCode.CHARGE_AMOUNT_INVALID.message());;
         }
     }
 
@@ -70,7 +71,7 @@ class PointTest {
 
             assertThatThrownBy(() -> point.use(BigDecimal.valueOf(500)))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining(ErrorCode.INSUFFICIENT_BALANCE.message());
+                    .hasMessage(PointErrorCode.INSUFFICIENT_BALANCE.message());
         }
 
         @Test
@@ -80,7 +81,7 @@ class PointTest {
 
             assertThatThrownBy(() -> point.use(BigDecimal.valueOf(-50)))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining(ErrorCode.CHARGE_AMOUNT_INVALID.message());
+                    .hasMessage(PointErrorCode.CHARGE_AMOUNT_INVALID.message());
         }
     }
 

@@ -19,7 +19,7 @@ public class Point {
 
     public static Point of(Long id, Long userId, BigDecimal initialBalance) {
         if (initialBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException(ErrorCode.INITIAL_BALANCE_NEGATIVE);
+            throw new BusinessException(PointErrorCode.INITIAL_BALANCE_NEGATIVE);
         }
         LocalDateTime now = LocalDateTime.now();
         return new Point(id, userId, initialBalance, now, now);
@@ -30,7 +30,7 @@ public class Point {
      */
     public void charge(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(ErrorCode.CHARGE_AMOUNT_INVALID);
+            throw new BusinessException(PointErrorCode.CHARGE_AMOUNT_INVALID);
         }
         this.balance = this.balance.add(amount);
         this.updatedAt = LocalDateTime.now();
@@ -41,10 +41,10 @@ public class Point {
      */
     public void use(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(ErrorCode.USE_AMOUNT_INVALID);
+            throw new BusinessException(PointErrorCode.USE_AMOUNT_INVALID);
         }
         if (this.balance.compareTo(amount) < 0) {
-            throw new BusinessException(ErrorCode.INSUFFICIENT_BALANCE);
+            throw new BusinessException(PointErrorCode.INSUFFICIENT_BALANCE);
         }
         this.balance = this.balance.subtract(amount);
         this.updatedAt = LocalDateTime.now();
