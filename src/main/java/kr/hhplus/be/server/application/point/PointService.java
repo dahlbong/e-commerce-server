@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.point.enums.PointHistoryType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -30,6 +31,7 @@ public class PointService {
         return point;
     }
 
+    @Transactional
     public Point use(Long userId, BigDecimal amount) {
         Point point = pointRepository.findByUserId(userId);
         BigDecimal before = point.getBalance();
@@ -37,7 +39,13 @@ public class PointService {
         point.use(amount);
         pointRepository.save(point);
 
-        PointHistory history = PointHistory.of(userId, PointHistoryType.USE, amount, before, point.getBalance());
+        PointHistory history = PointHistory.of(
+                userId,
+                PointHistoryType.USE,
+                amount,
+                before,
+                point.getBalance()
+        );
         pointHistoryRepository.save(history);
 
         return point;
