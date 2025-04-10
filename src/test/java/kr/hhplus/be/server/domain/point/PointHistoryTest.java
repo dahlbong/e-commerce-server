@@ -15,7 +15,6 @@ class PointHistoryTest {
     void createPointHistory_success() {
         PointHistory history = PointHistory.of(
                 1L,
-                1001L,
                 PointHistoryType.CHARGE,
                 BigDecimal.valueOf(500),
                 BigDecimal.valueOf(1000),
