@@ -21,7 +21,7 @@ class PointHistoryTest {
                 BigDecimal.valueOf(1500)
         );
 
-        assertThat(history.getUserId()).isEqualTo(1001L);
+        assertThat(history.getUserId()).isEqualTo(1L);
         assertThat(history.getType()).isEqualTo(PointHistoryType.CHARGE);
         assertThat(history.getAmount()).isEqualByComparingTo("500");
         assertThat(history.getBeforeBalance()).isEqualByComparingTo("1000");

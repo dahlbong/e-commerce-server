@@ -19,7 +19,7 @@ class ProductStockTest {
     void decreaseStock_success() {
 
         PRODUCT.getStock().decrease(10);
-        assertThat(PRODUCT.getStock()).isEqualTo(90);
+        assertThat(PRODUCT.getStock().getQuantity()).isEqualTo(90);
     }
 
     @Test

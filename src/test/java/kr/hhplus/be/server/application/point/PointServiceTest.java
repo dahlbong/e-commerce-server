@@ -1,14 +1,11 @@
 package kr.hhplus.be.server.application.point;
-import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.point.Point;
 import kr.hhplus.be.server.domain.point.PointHistory;
 import kr.hhplus.be.server.domain.point.PointHistoryRepository;
 import kr.hhplus.be.server.domain.point.PointRepository;
-import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import kr.hhplus.be.server.domain.point.enums.PointHistoryType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

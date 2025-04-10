@@ -18,7 +18,7 @@ class PointTest {
         void createPoint_success() {
             Point point = Point.of(1L, BigDecimal.valueOf(1000));
 
-            assertThat(point.getUserId()).isEqualTo(1001L);
+            assertThat(point.getUserId()).isEqualTo(1L);
             assertThat(point.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(1000));
         }
 
