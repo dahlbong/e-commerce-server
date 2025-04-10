@@ -15,14 +15,9 @@ public class OrderController {
 
     @PostMapping
     public List<OrderResponse> placeOrder(@RequestBody OrderRequest request) {
-        return orderService.placeOrder(request)
-                .stream()
+        return orderService.placeOrder(request).stream()
                 .map(OrderResponse::from)
                 .toList();
     }
 
-    @GetMapping("/{id}")
-    public OrderResponse getOrder(@PathVariable Long id) {
-        return OrderResponse.from(orderService.getOrder(id));
-    }
 }

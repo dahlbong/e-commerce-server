@@ -1,74 +1,88 @@
 package kr.hhplus.be.server.application.order;
 
-import kr.hhplus.be.server.api.order.OrderRequest;
-import kr.hhplus.be.server.domain.BusinessException;
-import kr.hhplus.be.server.domain.order.Order;
-import kr.hhplus.be.server.domain.order.Payment;
-import kr.hhplus.be.server.domain.order.OrderRepository;
-import kr.hhplus.be.server.domain.order.PaymentRepository;
-import kr.hhplus.be.server.application.product.ProductService;
 import kr.hhplus.be.server.application.point.PointService;
-import kr.hhplus.be.server.domain.order.OrderEventSender;
+import kr.hhplus.be.server.application.product.ProductService;
+import kr.hhplus.be.server.application.user.UserService;
+import kr.hhplus.be.server.domain.BusinessException;
+import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
+import kr.hhplus.be.server.domain.coupon.IssuedCouponRepository;
+import kr.hhplus.be.server.domain.coupon.enums.CouponErrorCode;
+import kr.hhplus.be.server.domain.order.*;
+import kr.hhplus.be.server.api.order.OrderRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepository orderRepository;
-    private final PaymentRepository paymentRepository;
     private final ProductService productService;
     private final PointService pointService;
+    private final UserService userService;
+
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
+    private final IssuedCouponRepository issuedCouponRepository;
+
     private final OrderEventSender orderEventSender;
 
-    @Transactional
     public List<Order> placeOrder(OrderRequest request) {
-        // 1. 상품 가격 조회
-        List<BigDecimal> prices = request.getItems().stream()
-                .map(item -> productService.getById(item.productId()).getPrice())
-                .toList();
+        Long userId = request.userId();
+        userService.getOrCreateById(userId);
 
-        // 2. 주문 도메인 생성 (단가 포함)
-        List<Order> orders = request.toOrders(prices);
+        List<Order> orders = request.toOrders(productService);
 
-        // 3. 총 결제 금액 계산
         BigDecimal totalAmount = orders.stream()
                 .map(Order::calculateTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 4. 결제 도메인 생성
-        Payment payment = request.toPayment(totalAmount);
+        // 할인 적용
+        BigDecimal discountAmount;
+        if (request.issuedCouponId() != null) {
+            IssuedCoupon coupon = issuedCouponRepository.findById(request.issuedCouponId());
+            if (!coupon.isValidNow(LocalDateTime.now())) {
+                throw new BusinessException(CouponErrorCode.COUPON_INACTIVATED);
+            }
+            discountAmount = calculateDiscountAmount(totalAmount, coupon);
+            coupon.use();
+            issuedCouponRepository.save(coupon);
 
-        // 5. 포인트 차감 및 상태 전이
-        try {
-            pointService.use(request.getUserId(), totalAmount);
-            payment.markAsCompleted();
-            orders.forEach(Order::markAsCompleted);
-        } catch (BusinessException e) {
-            payment.markAsFailed();
-            orders.forEach(Order::markAsFailed);
-            throw e;
+            // 주문마다 할인 적용
+            orders.forEach(o -> o.applyDiscount(discountAmount.divide(BigDecimal.valueOf(orders.size()), RoundingMode.DOWN)));
+        } else {
+            discountAmount = BigDecimal.ZERO;
         }
 
-        // 6. 연관관계 설정 및 저장
-        for (Order order : orders) {
-            order.setPayment(payment);
-            orderRepository.save(order);
-        }
+        BigDecimal finalAmount = totalAmount.subtract(discountAmount);
+
+        // 포인트 차감
+        pointService.use(userId, finalAmount);
+
+        // 결제 객체 생성
+        Payment payment = Payment.of("POINT", finalAmount);
+        orders.forEach(order -> order.setPayment(payment));
+
+        payment.markAsCompleted();
+        orders.forEach(Order::markAsCompleted);
+
+        orders.forEach(orderRepository::save);
         paymentRepository.save(payment);
-
-        // 7. 외부 이벤트 전송
         orderEventSender.send(orders);
 
         return orders;
     }
 
-    public Order getOrder(Long id) {
-        return orderRepository.findById(id);
+    private BigDecimal calculateDiscountAmount(BigDecimal totalAmount, IssuedCoupon coupon) {
+        return switch (coupon.getDiscountType()) {
+            case FIXED_AMOUNT -> coupon.getDiscountAmount();
+            case PERCENTAGE -> totalAmount
+                    .multiply(coupon.getDiscountAmount())
+                    .divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
+        };
     }
 }
