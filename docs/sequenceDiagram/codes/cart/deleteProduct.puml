@@ -1,0 +1,39 @@
+@startuml
+title 장바구니 상품 삭제 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "CartController" as API
+participant "CartService" as Cart
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 토큰 유효
+    Auth --> Client : userId 저장 (RequestContext)
+else 토큰 무효
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : DELETE /cart/items\n(userId, productId, variantId)
+
+API -> Cart : removeCartItem(userId, productId, variantId)
+
+Cart -> Database : SELECT * FROM cart_items\nWHERE user_id = ? AND product_id = ? AND variant_id = ?
+Database --> Cart : 장바구니 상품 존재 여부 반환
+
+alt 장바구니에 상품이 존재하는 경우
+    Cart -> Database : DELETE FROM cart_items\nWHERE user_id = ? AND product_id = ? AND variant_id = ?
+    Database --> Cart : 삭제 성공
+
+    Cart --> API : 삭제 성공
+    API --> Client : 삭제 성공 응답
+else 존재하지 않는 경우
+    Cart --> API : 삭제 실패 (해당 상품 없음)
+    API --> Client : 삭제 실패 응답\n("장바구니에 해당 상품이 없습니다.")
+end
+
+@enduml

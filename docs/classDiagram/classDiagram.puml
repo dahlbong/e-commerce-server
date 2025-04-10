@@ -1,0 +1,146 @@
+@startuml
+package "User" {
+  class User {
+    -id: Long
+    -name: String
+    -point: Point
+    +chargePoint(amount: BigDecimal): void
+    +usePoint(amount: BigDecimal): void
+  }
+
+  class Point {
+    -balance: BigDecimal
+    +add(amount: BigDecimal): void
+    +deduct(amount: BigDecimal): void
+  }
+
+  class PointHistory {
+    -type: PointHistoryType
+    -amount: BigDecimal
+    -beforeBalance: BigDecimal
+    -afterBalance: BigDecimal
+  }
+
+  enum PointHistoryType {
+    CHARGE
+    USE
+  }
+
+  User --> "*" PointHistory : logs >
+}
+
+package "Product" {
+  class Product {
+    -id: Long
+    -name: String
+    -price: BigDecimal
+    -status: SellingStatus
+    -stock: ProductStock
+    +isAvailable(): boolean
+    +sell(quantity: int): void
+  }
+
+  class ProductStock {
+    -quantity: int
+    +increase(amount: int): void
+    +decrease(amount: int): void
+  }
+
+  enum SellingStatus {
+    SELLING
+    STOPPED
+  }
+
+  Product --> "1" ProductStock : manages >
+}
+
+package "Coupon" {
+  class Coupon {
+    -name: String
+    -discountType: DiscountType
+    -discountAmount: BigDecimal
+    -validPeriod: Period
+    -remainCapacity: int
+    +issueTo(User): IssuedCoupon
+    +isValid(): boolean
+  }
+
+  class IssuedCoupon {
+    -status: IssuedCouponStatus
+    +isUsable(): boolean
+    +apply(amount: BigDecimal): BigDecimal
+  }
+
+  enum DiscountType {
+    PERCENTAGE
+    FIXED_AMOUNT
+  }
+
+  enum IssuedCouponStatus {
+    USED
+    UNUSED
+    EXPIRED
+  }
+
+  class Period {
+    -start: DateTime
+    -end: DateTime
+    +isInPeriod(): boolean
+  }
+
+  Coupon --> "*" IssuedCoupon : issues >
+  IssuedCoupon --> "1" Coupon : from >
+}
+
+package "Order" {
+  class Order {
+    -status: OrderStatus
+    -details: List<OrderDetail>
+    -payment: Payment
+    +addProduct(Product, quantity): void
+    +complete(): void
+  }
+
+  class OrderDetail {
+    -product: Product
+    -quantity: int
+    -unitPrice: BigDecimal
+    +getSubtotal(): BigDecimal
+  }
+
+  class Payment {
+    -status: PaymentStatus
+    -totalAmount: BigDecimal
+    -discount: BigDecimal
+    -finalAmount: BigDecimal
+    +applyCoupon(IssuedCoupon): void
+  }
+
+  enum OrderStatus {
+    PENDING
+    COMPLETED
+    CANCELED
+  }
+
+  enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+  }
+
+  Order --> "*" OrderDetail : contains >
+  Order --> "1" Payment : pays >
+}
+
+package "Infra" {
+  class DistributedLock {
+    -key: String
+    -owner: String
+    -lockedAt: DateTime
+    -expiresAt: DateTime
+    +isExpired(): boolean
+    +extend(): void
+    +release(): void
+  }
+}
+@enduml

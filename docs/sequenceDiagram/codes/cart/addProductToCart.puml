@@ -1,0 +1,49 @@
+@startuml
+title 장바구니 상품 추가 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "CartController" as API
+participant "CartService" as Cart
+participant "ProductService" as Product
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : POST /cart/items\n(productId, variantId, quantity)
+
+API -> Cart : addItemToCart(userId, productId, variantId, quantity)
+
+Cart -> Product : checkProductStock(productId, variantId, quantity)
+Product -> Database : SELECT * FROM product_variants WHERE product_id = ? AND variant_id = ?
+Database --> Product : 재고 및 판매 상태 반환
+Product --> Cart : 재고 상태 및 판매 여부 전달
+
+alt 재고 충분 & 판매중
+    Cart -> Database : SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? AND variant_id = ?
+    Database --> Cart : 장바구니에 해당 상품 존재 여부
+
+    alt 장바구니에 이미 존재함
+        Cart -> Database : UPDATE cart_items SET quantity = quantity + ? WHERE user_id = ? AND ...
+    else 새 상품
+        Cart -> Database : INSERT INTO cart_items(user_id, product_id, variant_id, quantity)
+    end
+
+    Cart --> API : 장바구니 추가 성공 응답
+    API --> Client : 추가 성공 응답\n(변경된 수량 또는 장바구니 항목 반환)
+
+else 재고 부족 or 판매 중지
+    Cart --> API : 장바구니 추가 실패 (재고 부족 또는 판매 중지)
+    API --> Client : 추가 실패 응답 (재고 부족 메시지)
+end
+
+@enduml

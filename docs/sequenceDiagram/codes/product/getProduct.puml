@@ -1,0 +1,33 @@
+@startuml
+title 상품 정보 조회 시퀀스 다이어그램
+
+actor Client
+participant "ProductController" as API
+participant "ProductService" as Product
+participant Database
+
+
+Client -> API : getProductDetails(productId)
+
+API -> Product : fetchProductDetails(productId)
+
+Product -> Database : SELECT * FROM products WHERE product_id = ?
+Database --> Product : 상품 기본 정보 (이름, 설명, 가격 등)
+
+Product -> Database : SELECT * FROM product_images WHERE product_id = ?
+Database --> Product : 이미지 목록 반환
+
+Product -> Database : SELECT * FROM product_variants WHERE product_id = ?
+Database --> Product : 옵션/재고 정보 반환
+
+alt 상품 없음
+    Product --> API : 상품 없음 예외 반환
+    API --> Client : 404 Not Found
+    return
+end
+
+Product --> API : 상품 상세 정보 반환\n(이름, 설명, 이미지, 옵션 등)
+
+API --> Client : 상품 상세 정보 응답
+
+@enduml

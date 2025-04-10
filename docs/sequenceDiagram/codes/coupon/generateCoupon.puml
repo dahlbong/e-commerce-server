@@ -1,0 +1,73 @@
+@startuml
+title 선착순 쿠폰 발급 시퀀스 다이어그램 (중복 발급 선검사 포함)
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "CouponController" as API
+participant "CouponService" as Coupon
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : issueCouponRequest(userId, couponId)
+
+API -> Coupon : processCouponIssuance(userId, couponId)
+
+== 중복 발급 선검사 ==
+Coupon -> Database : SELECT * FROM user_coupons WHERE user_id = ? AND coupon_id = ? AND status != 'EXPIRED'
+Database --> Coupon : 존재 여부 반환
+
+alt 이미 발급된 경우
+    Coupon --> API : 발급 실패 (이미 발급된 쿠폰)
+    API --> Client : 쿠폰 발급 실패 응답 (중복 발급 불가)
+    return
+end
+
+== beginTransaction ==
+Coupon -> Database : Acquire Lock for couponId
+Database --> Coupon : Lock Acquired / Failed
+
+alt 락 획득 성공
+
+    Coupon -> Database : SELECT quantity FROM coupon_inventory WHERE coupon_id = ? FOR UPDATE
+    Database --> Coupon : current quantity
+
+    alt 수량 충분
+        Coupon -> Database : UPDATE coupon_inventory SET quantity = quantity - 1 WHERE coupon_id = ?
+        Database --> Coupon : 수량 감소 완료
+
+        Coupon -> Database : INSERT INTO user_coupon_history (...)
+        Database --> Coupon : 이력 저장 완료
+
+        Coupon -> Database : INSERT INTO user_coupons (user_id, coupon_id, status) VALUES (...)
+        Database --> Coupon : 쿠폰 추가 완료
+
+        Coupon -> Database : Release Lock
+        Coupon -> Database : COMMIT
+
+        Coupon --> API : 발급 성공 (couponId, message)
+        API --> Client : 쿠폰 발급 성공 응답
+
+    else 수량 부족
+        Coupon -> Database : Release Lock
+        Coupon -> Database : ROLLBACK
+        Coupon --> API : 수량 부족 에러
+        API --> Client : 쿠폰 발급 실패 응답 (재고 없음)
+
+    end
+
+else 락 획득 실패
+    Coupon --> API : 발급 실패 (락 점유 중)
+    API --> Client : 쿠폰 발급 실패 응답 (다시 시도 요청)
+end
+
+@enduml

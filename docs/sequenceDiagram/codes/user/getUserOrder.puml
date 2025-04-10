@@ -1,0 +1,40 @@
+@startuml
+title 유저 주문 내역 조회 시퀀스 다이어그램
+
+actor Client
+participant "AuthInterceptor" as Auth
+participant "OrderController" as API
+participant "OrderService" as Order
+participant "ProductService" as Product
+participant Database
+
+Client -> Auth : Authorization: Bearer {accessToken}
+activate Auth
+alt 유효한 토큰
+    Auth --> Client : userId 저장 (RequestContext)
+else 유효하지 않은 토큰
+    Auth --> Client : 401 Unauthorized
+    deactivate Auth
+    return
+end
+deactivate Auth
+
+Client -> API : GET /orders
+
+API -> Order : getOrdersByUser(userId)
+
+Order -> Database : SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC
+Database --> Order : 주문 목록 반환
+
+Order -> Database : SELECT * FROM order_items WHERE order_id IN (...)
+Database --> Order : 주문별 상품 목록 반환
+
+Order -> Product : getProductDetails(productId, variantId) for each item
+Product -> Database : SELECT name, image_url FROM products, product_variants WHERE ...
+Database --> Product : 상품 이름, 썸네일 반환
+Product --> Order : 상품 상세 정보 반환
+
+Order --> API : 사용자 주문 내역 목록 (주문 + 상품 포함)
+API --> Client : 주문 내역 목록 응답
+
+@enduml
