@@ -2,25 +2,31 @@ package kr.hhplus.be.server.infra.product;
 
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
+import kr.hhplus.be.server.domain.product.enums.SellingStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductJpaRepository productJpaRepository;
 
     @Override
-    public List<Product> findAllWithStock() {
-        return productJpaRepository.findAllWithStock();
+    public Product save(Product product) {
+        return productJpaRepository.save(product);
     }
 
     @Override
-    public Product findById(Long id) {
-        return productJpaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + id));
+    public Product findById(Long productId) {
+        return productJpaRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+    }
+
+    @Override
+    public List<Product> findSellingStatusIn(List<SellingStatus> statuses) {
+        return productJpaRepository.findBySellStatusIn(statuses);
     }
 }

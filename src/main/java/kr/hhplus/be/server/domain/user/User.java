@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.user;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.BusinessException;
+import kr.hhplus.be.server.domain.user.enums.UserErrorCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

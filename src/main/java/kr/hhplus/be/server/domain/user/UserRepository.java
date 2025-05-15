@@ -1,10 +1,11 @@
 package kr.hhplus.be.server.domain.user;
 
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
+@Component
 public interface UserRepository {
-    Optional<User> findOptionalById(Long id);
 
-    User findById(Long id);
     User save(User user);
+
+    User findById(Long userId);
 }

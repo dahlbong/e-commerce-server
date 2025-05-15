@@ -2,29 +2,32 @@ package kr.hhplus.be.server.infra.point;
 
 import kr.hhplus.be.server.domain.point.Point;
 import kr.hhplus.be.server.domain.point.PointRepository;
+import kr.hhplus.be.server.domain.point.PointTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class PointRepositoryImpl implements PointRepository {
 
     private final PointJpaRepository jpaRepository;
+    private final PointTransactionJpaRepository transactionJpaRepository;
 
     @Override
-    public Point findByUserId(Long userId) {
-        Point point = jpaRepository.findByUserId(userId);
-        if (point == null) {
-            // 포인트가 없으면 0원으로 새로 생성
-            point = Point.of(userId, BigDecimal.ZERO);
-            jpaRepository.save(point); // 영속화까지 할지 말지는 전략적으로 선택
-        }
-        return point;
+    public Optional<Point> findOptionalByUserId(Long userId) {
+        return jpaRepository.findByUserId(userId);
     }
+
     @Override
     public Point save(Point point) {
         return jpaRepository.save(point);
+    }
+
+    @Override
+    public PointTransaction saveTransaction(PointTransaction transaction) {
+        return transactionJpaRepository.save(transaction);
     }
 }

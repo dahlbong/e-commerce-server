@@ -1,85 +1,94 @@
 package kr.hhplus.be.server.domain.order;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.BusinessException;
-import kr.hhplus.be.server.domain.order.enums.OrderErrorCode;
 import kr.hhplus.be.server.domain.order.enums.OrderStatus;
-import kr.hhplus.be.server.domain.product.Product;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
-@Table(name = "order")
 @Getter
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_order_status_paid_at", columnList = "order_status, paid_at")
+})
 public class Order {
 
     @Id
+    @Column(name = "order_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    private int quantity;
-
-    private BigDecimal unitPrice;
+    private Long userCouponId;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus orderStatus;
 
-    private BigDecimal discountAmount = BigDecimal.ZERO;
+    private long totalPrice;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private long discountPrice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
-    public static Order of(Long userId, Product product, int quantity) {
-        if (quantity <= 0) {
-            throw new BusinessException(OrderErrorCode.QUANTITY_SHOULD_BE_POSITIVE);
+    private LocalDateTime paidAt;
+
+    @Builder
+    private Order(Long userId, Long userCouponId, double discountRate, List<OrderProduct> orderProducts) {
+        this.userId = userId;
+        this.userCouponId = userCouponId;
+        this.orderStatus = OrderStatus.CREATED;
+
+        orderProducts.forEach(this::addOrderProduct);
+
+        long calculatedTotalPrice = calculateTotalPrice(orderProducts);
+        long calculatedDiscountPrice = calculateDiscountPrice(calculatedTotalPrice, discountRate);
+
+        this.totalPrice = calculatedTotalPrice - calculatedDiscountPrice;
+        this.discountPrice = calculatedDiscountPrice;
+    }
+
+    public static Order create(Long userId, Long userCouponId, double discountRate, List<OrderProduct> orderProducts) {
+        validateOrderProducts(orderProducts);
+
+        return Order.builder()
+                .userId(userId)
+                .userCouponId(userCouponId)
+                .discountRate(discountRate)
+                .orderProducts(orderProducts)
+                .build();
+    }
+
+    public void paid(LocalDateTime paidAt) {
+        this.orderStatus = OrderStatus.PAID;
+        this.paidAt = paidAt;
+    }
+
+    private long calculateTotalPrice(List<OrderProduct> orderProducts) {
+        return orderProducts.stream()
+                .mapToLong(OrderProduct::getPrice)
+                .sum();
+    }
+
+    private long calculateDiscountPrice(long totalPrice, double discountRate) {
+        return (long) (totalPrice * discountRate);
+    }
+
+    private void addOrderProduct(OrderProduct orderProduct) {
+        this.orderProducts.add(orderProduct);
+        orderProduct.setOrder(this);
+    }
+
+    private static void validateOrderProducts(List<OrderProduct> orderProducts) {
+        if (orderProducts == null || orderProducts.isEmpty()) {
+            throw new IllegalArgumentException("주문 상품이 없습니다.");
         }
-
-        Order order = new Order();
-        order.userId = userId;
-        order.product = product;
-        order.quantity = quantity;
-        order.unitPrice = product.getPrice();
-        order.status = OrderStatus.PENDING;
-        order.createdAt = LocalDateTime.now();
-        order.updatedAt = LocalDateTime.now();
-        return order;
-    }
-
-    public void applyDiscount(BigDecimal discount) {
-        this.discountAmount = discount;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void markAsCompleted() {
-        this.status = OrderStatus.COMPLETED;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public BigDecimal calculateTotalPrice() {
-        return unitPrice.multiply(BigDecimal.valueOf(quantity)).subtract(discountAmount);
-    }
-
-    public Long getProductId() {
-        return product.getId();
     }
 }
