@@ -2,7 +2,7 @@ package kr.hhplus.be.server.support.lock;
 
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap
+import java.util.HashMap;
 import java.util.Map;
 
 @Component

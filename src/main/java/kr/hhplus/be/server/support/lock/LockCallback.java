@@ -1,4 +1,7 @@
 package kr.hhplus.be.server.support.lock;
 
-public class LockCallback {
+@FunctionalInterface
+public interface LockCallback<T> {
+
+    T doInLock() throws Throwable;
 }
