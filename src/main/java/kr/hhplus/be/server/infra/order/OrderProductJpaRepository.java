@@ -4,7 +4,7 @@ import kr.hhplus.be.server.domain.order.OrderProduct;
 
 import java.util.List;
 
-public interface OrderProductRepository {
+public interface OrderProductJpaRepository {
 
     List<OrderProduct> findByOrderIdIn(List<Long> orderIds);
 }
