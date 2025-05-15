@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.user;
+package kr.hhplus.be.server.domain.user.enums;
 
 import kr.hhplus.be.server.domain.ErrorCode;
 
