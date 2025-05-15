@@ -1,4 +1,7 @@
 package kr.hhplus.be.server.infra.point;
 
-public class PointTransactionJpaRepository {
+import kr.hhplus.be.server.domain.point.PointTransaction;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PointTransactionJpaRepository extends JpaRepository<PointTransaction, Long> {
 }
