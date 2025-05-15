@@ -1,4 +1,7 @@
 package kr.hhplus.be.server.domain.order;
 
-public class OrderExternalClient {
+public interface OrderExternalClient {
+
+    void sendOrderMessage(Order order);
+
 }
