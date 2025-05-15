@@ -3,40 +3,53 @@ package kr.hhplus.be.server.domain.point;
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.point.enums.PointTransactionType;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "point_history")
 @Getter
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PointHistory {
+public class PointTransaction {
 
     @Id
+    @Column(name = "transaction_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "balance_id")
+    private Point balance;
 
     @Enumerated(EnumType.STRING)
-    private PointTransactionType type; // CHARGE / USE
+    private PointTransactionType type;
 
     private BigDecimal amount;
-    private BigDecimal beforeBalance;
-    private BigDecimal afterBalance;
-    private LocalDateTime createdAt;
 
-    public static PointHistory of(Long userId, PointTransactionType type, BigDecimal amount, BigDecimal before, BigDecimal after) {
-        PointHistory history = new PointHistory();
-        history.userId = userId;
-        history.type = type;
-        history.amount = amount;
-        history.beforeBalance = before;
-        history.afterBalance = after;
-        history.createdAt = LocalDateTime.now();
-        return history;
+    @Builder
+    private PointTransaction(Long id, Point balance, PointTransactionType type, BigDecimal amount) {
+        this.id = id;
+        this.balance = balance;
+        this.type = type;
+        this.amount = amount;
+    }
+
+    public static PointTransaction ofCharge(Point balance, BigDecimal amount) {
+        return PointTransaction.builder()
+                .balance(balance)
+                .type(PointTransactionType.CHARGE)
+                .amount(amount)
+                .build();
+    }
+
+    public static PointTransaction ofUse(Point balance, BigDecimal amount) {
+        return PointTransaction.builder()
+                .balance(balance)
+                .type(PointTransactionType.USE)
+                .amount(amount.negate())
+                .build();
     }
 }

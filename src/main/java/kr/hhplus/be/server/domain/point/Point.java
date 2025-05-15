@@ -4,11 +4,14 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "point")
@@ -16,7 +19,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Point {
 
+    private static final long MAX_POINT = 10_000_000L;
+
     @Id
+    @Column(name = "point_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long userId;
@@ -24,18 +30,24 @@ public class Point {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static Point of(Long userId, BigDecimal initialBalance) {
-        if (initialBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException(PointErrorCode.INITIAL_BALANCE_NEGATIVE);
-        }
-        Point point = new Point();
-        point.userId = userId;
-        point.balance = initialBalance;
-        point.createdAt = LocalDateTime.now();
-        point.updatedAt = point.createdAt;
-        return point;
+    @OneToMany(mappedBy = "balance", cascade = CascadeType.ALL)
+    private List<PointTransaction> transactions = new ArrayList<>();
+
+    @Builder
+    private Point(Long id, Long userId, BigDecimal amount) {
+        this.id = id;
+        this.userId = userId;
+        this.balance = amount;
+
+        addChargeTransaction(amount);
     }
 
+    public static Point of(Long userId, BigDecimal amount) {
+        return Point.builder()
+                .userId(userId)
+                .amount(amount)
+                .build();
+    }
 
     /**
      * 포인트 충전
@@ -46,6 +58,7 @@ public class Point {
         }
         this.balance = this.balance.add(amount);
         this.updatedAt = LocalDateTime.now();
+        addChargeTransaction(amount);
     }
 
     /**
@@ -60,5 +73,16 @@ public class Point {
         }
         this.balance = this.balance.subtract(amount);
         this.updatedAt = LocalDateTime.now();
+        addUseTransaction(amount);
+    }
+
+    private void addChargeTransaction(BigDecimal amount) {
+        PointTransaction transaction = PointTransaction.ofCharge(this, amount);
+        this.transactions.add(transaction);
+    }
+
+    private void addUseTransaction(BigDecimal amount) {
+        PointTransaction transaction = PointTransaction.ofUse(this, amount);
+        this.transactions.add(transaction);
     }
 }
