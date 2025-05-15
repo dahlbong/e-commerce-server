@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.user;
+package kr.hhplus.be.server.domain.user.userCoupon;
 
 import lombok.AccessLevel;
 import lombok.Getter;

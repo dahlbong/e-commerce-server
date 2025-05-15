@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.user;
+package kr.hhplus.be.server.domain.user.userCoupon;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.user.enums.UserCouponUsedStatus;
