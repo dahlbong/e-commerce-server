@@ -4,7 +4,7 @@ import kr.hhplus.be.server.domain.point.Point;
 import kr.hhplus.be.server.domain.point.PointRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
-import kr.hhplus.be.server.test.supporters.IntegrationTestSupport;
+import kr.hhplus.be.server.supporters.IntegrationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

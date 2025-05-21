@@ -4,7 +4,7 @@ import kr.hhplus.be.server.domain.product.ProductInfo;
 import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.stock.StockInfo;
 import kr.hhplus.be.server.domain.stock.StockService;
-import kr.hhplus.be.server.test.supporters.MockTestSupport;
+import kr.hhplus.be.server.supporters.MockTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;

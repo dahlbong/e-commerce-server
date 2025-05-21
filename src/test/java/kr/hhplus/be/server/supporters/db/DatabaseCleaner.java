@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.test.supporters.db;
+package kr.hhplus.be.server.supporters.db;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Entity;

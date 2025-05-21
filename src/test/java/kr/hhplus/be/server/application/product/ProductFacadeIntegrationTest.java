@@ -6,7 +6,7 @@ import kr.hhplus.be.server.domain.product.ProductRepository;
 import kr.hhplus.be.server.domain.product.enums.SellingStatus;
 import kr.hhplus.be.server.domain.stock.Stock;
 import kr.hhplus.be.server.domain.stock.StockRepository;
-import kr.hhplus.be.server.test.supporters.IntegrationTestSupport;
+import kr.hhplus.be.server.supporters.IntegrationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

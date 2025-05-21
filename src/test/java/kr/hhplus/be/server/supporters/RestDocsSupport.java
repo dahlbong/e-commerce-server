@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.test.supporters;
+package kr.hhplus.be.server.supporters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

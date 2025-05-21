@@ -20,7 +20,7 @@ import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.domain.user.enums.UserCouponUsedStatus;
 import kr.hhplus.be.server.domain.user.userCoupon.UserCoupon;
 import kr.hhplus.be.server.domain.user.userCoupon.UserCouponRepository;
-import kr.hhplus.be.server.test.supporters.IntegrationTestSupport;
+import kr.hhplus.be.server.supporters.IntegrationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

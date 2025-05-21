@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.test.supporters;
+package kr.hhplus.be.server.supporters;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

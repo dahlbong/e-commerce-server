@@ -5,7 +5,7 @@ import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.user.UserService;
 import kr.hhplus.be.server.domain.user.userCoupon.UserCouponInfo;
 import kr.hhplus.be.server.domain.user.userCoupon.UserCouponService;
-import kr.hhplus.be.server.test.supporters.MockTestSupport;
+import kr.hhplus.be.server.supporters.MockTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;

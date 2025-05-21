@@ -3,7 +3,7 @@ package kr.hhplus.be.server.application.point;
 import kr.hhplus.be.server.domain.point.PointInfo;
 import kr.hhplus.be.server.domain.point.PointService;
 import kr.hhplus.be.server.domain.user.UserService;
-import kr.hhplus.be.server.test.supporters.MockTestSupport;
+import kr.hhplus.be.server.supporters.MockTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;

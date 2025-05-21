@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.test.supporters;
+package kr.hhplus.be.server.supporters;
 
 import kr.hhplus.be.ecommerce.test.support.container.MySQLContainerExtension;
 import kr.hhplus.be.ecommerce.test.support.container.RedisContainerExtension;

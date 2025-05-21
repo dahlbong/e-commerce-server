@@ -1,6 +1,6 @@
 package kr.hhplus.be.server;
 
-import kr.hhplus.be.server.test.supporters.ContainerTestSupport;
+import kr.hhplus.be.server.supporters.ContainerTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

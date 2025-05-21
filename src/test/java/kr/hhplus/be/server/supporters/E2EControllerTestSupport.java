@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.test.supporters;
+package kr.hhplus.be.server.supporters;
 
 import io.restassured.RestAssured;
 import kr.hhplus.be.ecommerce.test.support.database.DatabaseCleaner;

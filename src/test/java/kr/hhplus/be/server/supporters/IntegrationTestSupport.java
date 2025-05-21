@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.test.supporters;
+package kr.hhplus.be.server.supporters;
 
 import kr.hhplus.be.ecommerce.test.support.database.RedisCacheCleaner;
 import kr.hhplus.be.ecommerce.test.support.database.RedisKeyCleaner;
