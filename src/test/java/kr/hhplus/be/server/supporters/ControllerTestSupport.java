@@ -1,23 +1,23 @@
 package kr.hhplus.be.server.supporters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.hhplus.be.ecommerce.application.balance.BalanceFacade;
-import kr.hhplus.be.ecommerce.application.order.OrderFacade;
-import kr.hhplus.be.ecommerce.application.product.ProductFacade;
-import kr.hhplus.be.ecommerce.application.rank.RankFacade;
-import kr.hhplus.be.ecommerce.application.user.UserCouponFacade;
-import kr.hhplus.be.ecommerce.interfaces.balance.BalanceController;
-import kr.hhplus.be.ecommerce.interfaces.order.OrderController;
-import kr.hhplus.be.ecommerce.interfaces.product.ProductController;
-import kr.hhplus.be.ecommerce.interfaces.rank.RankController;
-import kr.hhplus.be.ecommerce.interfaces.user.UserCouponController;
+import kr.hhplus.be.server.application.order.OrderFacade;
+import kr.hhplus.be.server.application.point.PointFacade;
+import kr.hhplus.be.server.application.product.ProductFacade;
+import kr.hhplus.be.server.application.rank.RankFacade;
+import kr.hhplus.be.server.application.user.UserCouponFacade;
+import kr.hhplus.be.server.interfaces.order.OrderController;
+import kr.hhplus.be.server.interfaces.point.PointController;
+import kr.hhplus.be.server.interfaces.product.ProductController;
+import kr.hhplus.be.server.interfaces.rank.RankController;
+import kr.hhplus.be.server.interfaces.user.UserCouponController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = {
-    BalanceController.class,
+    PointController.class,
     UserCouponController.class,
     OrderController.class,
     ProductController.class,
@@ -32,7 +32,7 @@ public abstract class ControllerTestSupport {
     protected ObjectMapper objectMapper;
 
     @MockitoBean
-    protected BalanceFacade balanceFacade;
+    protected PointFacade pointFacade;
 
     @MockitoBean
     protected OrderFacade orderFacade;

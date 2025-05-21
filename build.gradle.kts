@@ -63,6 +63,9 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// RestAssured
+	testImplementation("io.rest-assured:rest-assured:5.3.1")
 }
 
 tasks.withType<Test> {
