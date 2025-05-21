@@ -66,6 +66,9 @@ dependencies {
 
 	// RestAssured
 	testImplementation("io.rest-assured:rest-assured:5.3.1")
+
+	// RestDocs
+	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
 tasks.withType<Test> {

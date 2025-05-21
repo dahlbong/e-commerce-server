@@ -1,19 +1,19 @@
-package kr.hhplus.be.ecommerce.application.order;
+package kr.hhplus.be.server.application.order;
 
-import kr.hhplus.be.ecommerce.domain.balance.BalanceService;
-import kr.hhplus.be.ecommerce.domain.coupon.CouponInfo;
-import kr.hhplus.be.ecommerce.domain.coupon.CouponService;
-import kr.hhplus.be.ecommerce.domain.order.OrderInfo;
-import kr.hhplus.be.ecommerce.domain.order.OrderService;
-import kr.hhplus.be.ecommerce.domain.payment.PaymentService;
-import kr.hhplus.be.ecommerce.domain.product.ProductInfo;
-import kr.hhplus.be.ecommerce.domain.product.ProductService;
-import kr.hhplus.be.ecommerce.domain.rank.RankService;
-import kr.hhplus.be.ecommerce.domain.stock.StockService;
-import kr.hhplus.be.ecommerce.domain.user.UserCouponInfo;
-import kr.hhplus.be.ecommerce.domain.user.UserCouponService;
-import kr.hhplus.be.ecommerce.domain.user.UserService;
-import kr.hhplus.be.ecommerce.test.support.MockTestSupport;
+import kr.hhplus.be.server.domain.coupon.CouponInfo;
+import kr.hhplus.be.server.domain.coupon.CouponService;
+import kr.hhplus.be.server.domain.order.OrderInfo;
+import kr.hhplus.be.server.domain.order.OrderService;
+import kr.hhplus.be.server.domain.payment.PaymentService;
+import kr.hhplus.be.server.domain.point.PointService;
+import kr.hhplus.be.server.domain.product.ProductInfo;
+import kr.hhplus.be.server.domain.product.ProductService;
+import kr.hhplus.be.server.domain.rank.RankService;
+import kr.hhplus.be.server.domain.stock.StockService;
+import kr.hhplus.be.server.domain.user.UserService;
+import kr.hhplus.be.server.domain.user.userCoupon.UserCouponInfo;
+import kr.hhplus.be.server.domain.user.userCoupon.UserCouponService;
+import kr.hhplus.be.server.supporters.MockTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -43,7 +43,7 @@ class OrderFacadeUnitTest extends MockTestSupport {
     private OrderService orderService;
 
     @Mock
-    private BalanceService balanceService;
+    private PointService pointService;
 
     @Mock
     private StockService stockService;
@@ -79,7 +79,7 @@ class OrderFacadeUnitTest extends MockTestSupport {
             couponService,
             orderService,
             orderService,
-            balanceService,
+            pointService,
             stockService,
             paymentService,
             rankService
@@ -94,7 +94,7 @@ class OrderFacadeUnitTest extends MockTestSupport {
             mockCoupon.getCouponId(),
             mockOrderProducts
         ));
-        inOrder.verify(balanceService, times(1)).useBalance(criteria.toBalanceCommand(
+        inOrder.verify(pointService, times(1)).usePoint(criteria.toPointCommand(
             mockOrder.getTotalPrice()
         ));
         inOrder.verify(userCouponService, times(1)).useUserCoupon(mockUsableCoupon.getUserCouponId());

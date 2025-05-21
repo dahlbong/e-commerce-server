@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.user;
 
-import kr.hhplus.be.ecommerce.application.user.UserCouponResult;
-import kr.hhplus.be.ecommerce.test.support.ControllerTestSupport;
+import kr.hhplus.be.server.application.user.UserCouponResult;
+import kr.hhplus.be.server.supporters.ControllerTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

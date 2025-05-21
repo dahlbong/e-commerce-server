@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.supporters.db;
 
-import kr.hhplus.be.ecommerce.support.key.KeyType;
+import kr.hhplus.be.server.supporters.key.KeyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.StringRedisTemplate;

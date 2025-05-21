@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.supporters;
 
-import kr.hhplus.be.ecommerce.test.support.container.MySQLContainerExtension;
-import kr.hhplus.be.ecommerce.test.support.container.RedisContainerExtension;
+import kr.hhplus.be.server.supporters.container.MysqlContainerExtension;
+import kr.hhplus.be.server.supporters.container.RedisContainerExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -9,7 +9,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 
 @ExtendWith({
-    MySQLContainerExtension.class,
+    MysqlContainerExtension.class,
     RedisContainerExtension.class,
 })
 public abstract class ContainerTestSupport {
@@ -17,7 +17,7 @@ public abstract class ContainerTestSupport {
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         // MySQL
-        MySQLContainer<?> mySQLContainer = MySQLContainerExtension.getContainer();
+        MySQLContainer<?> mySQLContainer = MysqlContainerExtension.getContainer();
         registry.add("spring.datasource.url", () -> mySQLContainer.getJdbcUrl() + "?characterEncoding=UTF-8&serverTimezone=UTC");
         registry.add("spring.datasource.username", mySQLContainer::getUsername);
         registry.add("spring.datasource.password", mySQLContainer::getPassword);

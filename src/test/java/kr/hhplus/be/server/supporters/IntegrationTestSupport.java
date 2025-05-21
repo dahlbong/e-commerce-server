@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.supporters;
 
-import kr.hhplus.be.ecommerce.test.support.database.RedisCacheCleaner;
-import kr.hhplus.be.ecommerce.test.support.database.RedisKeyCleaner;
+import kr.hhplus.be.server.supporters.db.RedisCacheCleaner;
+import kr.hhplus.be.server.supporters.db.RedisKeyCleaner;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

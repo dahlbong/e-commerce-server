@@ -1,9 +1,9 @@
 package kr.hhplus.be.server.supporters;
 
 import io.restassured.RestAssured;
-import kr.hhplus.be.ecommerce.test.support.database.DatabaseCleaner;
-import kr.hhplus.be.ecommerce.test.support.database.RedisCacheCleaner;
-import kr.hhplus.be.ecommerce.test.support.database.RedisKeyCleaner;
+import kr.hhplus.be.server.supporters.db.DatabaseCleaner;
+import kr.hhplus.be.server.supporters.db.RedisCacheCleaner;
+import kr.hhplus.be.server.supporters.db.RedisKeyCleaner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
