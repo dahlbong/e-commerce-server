@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.product;
 import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.ProductRepository;
+import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.product.enums.ProductErrorCode;
 import kr.hhplus.be.server.domain.product.enums.SellingStatus;
 import org.junit.jupiter.api.DisplayName;

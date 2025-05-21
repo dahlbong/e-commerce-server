@@ -1,93 +1,109 @@
 package kr.hhplus.be.server.domain.coupon;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.BusinessException;
-import kr.hhplus.be.server.domain.coupon.enums.CouponErrorCode;
 import kr.hhplus.be.server.domain.coupon.enums.CouponStatus;
-import kr.hhplus.be.server.domain.coupon.enums.DiscountType;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "coupon")
 @Getter
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Coupon {
 
     @Id
+    @Column(name = "coupon_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private DiscountType discountType;
+    private double discountRate;
 
-    private BigDecimal discountAmount;
-
-    private int maxCapacity;
-
-    private int remainCapacity;
+    private int quantity;
 
     @Enumerated(EnumType.STRING)
     private CouponStatus status;
 
-    private LocalDateTime validStartedAt;
+    private LocalDateTime expiredAt;
 
-    private LocalDateTime validEndedAt;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
-    public static Coupon of(String name, DiscountType discountType, BigDecimal discountAmount,
-                            int maxCapacity, LocalDateTime validStartedAt, LocalDateTime validEndedAt) {
-        if (discountAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(CouponErrorCode.DISCOUNT_AMOUNT_SHOULD_BE_POSITIVE);
-        }
-        if (validStartedAt.isAfter(validEndedAt)) {
-            throw new BusinessException(CouponErrorCode.INVALID_VALID_PERIOD);
-        }
-        if (maxCapacity <= 0) {
-            throw new BusinessException(CouponErrorCode.MAX_CAPACITY_SHOULD_BE_POSITIVE);
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-
-        Coupon coupon = new Coupon();
-        coupon.name = name;
-        coupon.discountType = discountType;
-        coupon.discountAmount = discountAmount;
-        coupon.maxCapacity = maxCapacity;
-        coupon.remainCapacity = maxCapacity;
-        coupon.status = CouponStatus.ACTIVE;
-        coupon.validStartedAt = validStartedAt;
-        coupon.validEndedAt = validEndedAt;
-        coupon.createdAt = now;
-        coupon.updatedAt = now;
-        return coupon;
-    }
-
-    public void issue() {
-        if (remainCapacity <= 0 || status != CouponStatus.ACTIVE) {
-            throw new BusinessException(CouponErrorCode.OUT_OF_CAPACITY);
-        }
-        this.remainCapacity--;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public boolean isValidNow(LocalDateTime now) {
-        return status == CouponStatus.ACTIVE
-                && !now.isBefore(validStartedAt)
-                && !now.isAfter(validEndedAt);
-    }
-
-    public Coupon assignId(Long id) {
+    @Builder
+    private Coupon(Long id, String name, double discountRate, int quantity, CouponStatus status, LocalDateTime expiredAt) {
         this.id = id;
+        this.name = name;
+        this.discountRate = discountRate;
+        this.quantity = quantity;
+        this.status = status;
+        this.expiredAt = expiredAt;
+    }
+
+    public static Coupon create(String name, double discountRate, int quantity, CouponStatus status, LocalDateTime expiredAt) {
+        validateName(name);
+        validateDiscountRate(discountRate);
+        validateQuantity(quantity);
+        validateStatus(status);
+        validateExpiredAt(expiredAt);
+
+        return Coupon.builder()
+                .name(name)
+                .discountRate(discountRate)
+                .quantity(quantity)
+                .status(status)
+                .expiredAt(expiredAt)
+                .build();
+    }
+
+    public Coupon publish() {
+        if (status.cannotPublishable()) {
+            throw new IllegalStateException("쿠폰을 발급할 수 없습니다.");
+        }
+
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("쿠폰이 만료되었습니다.");
+        }
+
+        if (quantity <= 0) {
+            throw new IllegalStateException("쿠폰 수량이 부족합니다.");
+        }
+
+        this.quantity--;
         return this;
+    }
+
+    public void finish() {
+        this.status = CouponStatus.FINISHED;
+    }
+
+    private static void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("쿠폰 이름은 필수입니다.");
+        }
+    }
+
+    private static void validateDiscountRate(double discountRate) {
+        if (discountRate < 0 || discountRate > 1) {
+            throw new IllegalArgumentException("쿠폰 할인율이 올바르지 않습니다.");
+        }
+    }
+
+    private static void validateQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("쿠폰 수량은 0 이상이어야 합니다.");
+        }
+    }
+
+    private static void validateStatus(CouponStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("쿠폰 상태는 필수입니다.");
+        }
+    }
+
+    private static void validateExpiredAt(LocalDateTime expiredAt) {
+        if (expiredAt == null || expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("쿠폰 만료일은 현재 시간 이후여야 합니다.");
+        }
     }
 }

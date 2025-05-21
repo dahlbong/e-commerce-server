@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.application.point;
 import kr.hhplus.be.server.domain.point.Point;
-import kr.hhplus.be.server.domain.point.PointHistory;
+import kr.hhplus.be.server.domain.point.PointService;
+import kr.hhplus.be.server.domain.point.PointTransaction;
 import kr.hhplus.be.server.domain.point.PointHistoryRepository;
 import kr.hhplus.be.server.domain.point.PointRepository;
-import kr.hhplus.be.server.domain.point.enums.PointHistoryType;
+import kr.hhplus.be.server.domain.point.enums.PointTransactionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,13 +65,13 @@ class PointServiceTest {
         assertThat(result.getBalance()).isEqualByComparingTo("1500");
         verify(pointRepository).save(userPoint);
 
-        ArgumentCaptor<PointHistory> captor = ArgumentCaptor.forClass(PointHistory.class);
+        ArgumentCaptor<PointTransaction> captor = ArgumentCaptor.forClass(PointTransaction.class);
         verify(pointHistoryRepository).save(captor.capture());
-        PointHistory history = captor.getValue();
+        PointTransaction history = captor.getValue();
 
         assertThat(history.getUserId()).isEqualTo(1L);
         assertThat(history.getAmount()).isEqualByComparingTo("500");
-        assertThat(history.getType()).isEqualTo(PointHistoryType.CHARGE);
+        assertThat(history.getType()).isEqualTo(PointTransactionType.CHARGE);
         assertThat(history.getBeforeBalance()).isEqualByComparingTo("1000");
         assertThat(history.getAfterBalance()).isEqualByComparingTo("1500");
     }
@@ -85,13 +86,13 @@ class PointServiceTest {
         assertThat(result.getBalance()).isEqualByComparingTo("600");
         verify(pointRepository).save(userPoint);
 
-        ArgumentCaptor<PointHistory> captor = ArgumentCaptor.forClass(PointHistory.class);
+        ArgumentCaptor<PointTransaction> captor = ArgumentCaptor.forClass(PointTransaction.class);
         verify(pointHistoryRepository).save(captor.capture());
-        PointHistory history = captor.getValue();
+        PointTransaction history = captor.getValue();
 
         assertThat(history.getUserId()).isEqualTo(1L);
         assertThat(history.getAmount()).isEqualByComparingTo("400");
-        assertThat(history.getType()).isEqualTo(PointHistoryType.USE);
+        assertThat(history.getType()).isEqualTo(PointTransactionType.USE);
         assertThat(history.getBeforeBalance()).isEqualByComparingTo("1000");
         assertThat(history.getAfterBalance()).isEqualByComparingTo("600");
     }

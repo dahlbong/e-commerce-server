@@ -1,15 +1,16 @@
 package kr.hhplus.be.server.application.order;
 
-import kr.hhplus.be.server.api.order.OrderRequest;
-import kr.hhplus.be.server.application.point.PointService;
-import kr.hhplus.be.server.application.product.ProductService;
-import kr.hhplus.be.server.application.user.UserService;
+import kr.hhplus.be.server.interfaces.order.OrderRequest;
+import kr.hhplus.be.server.domain.order.OrderService;
+import kr.hhplus.be.server.domain.point.PointService;
+import kr.hhplus.be.server.domain.product.ProductService;
+import kr.hhplus.be.server.domain.user.UserService;
 import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.be.server.domain.order.Order;
 import kr.hhplus.be.server.domain.order.OrderEventSender;
 import kr.hhplus.be.server.domain.order.OrderRepository;
-import kr.hhplus.be.server.domain.order.PaymentRepository;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import kr.hhplus.be.server.domain.product.Product;
 import kr.hhplus.be.server.domain.product.enums.ProductErrorCode;

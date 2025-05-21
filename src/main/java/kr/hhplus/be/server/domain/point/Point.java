@@ -1,64 +1,66 @@
 package kr.hhplus.be.server.domain.point;
 
 import jakarta.persistence.*;
-import kr.hhplus.be.server.domain.BusinessException;
-import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "point")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "point", indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id")
+})
 public class Point {
 
+    private static final long MAX_POINT = 10_000_000L;
+    private static final long INIT_POINT = 0L;
+
     @Id
+    @Column(name = "point_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Long userId;
-    private BigDecimal balance;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    public static Point of(Long userId, BigDecimal initialBalance) {
-        if (initialBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessException(PointErrorCode.INITIAL_BALANCE_NEGATIVE);
-        }
-        Point point = new Point();
-        point.userId = userId;
-        point.balance = initialBalance;
-        point.createdAt = LocalDateTime.now();
-        point.updatedAt = point.createdAt;
-        return point;
+    private long amount;
+
+    @Builder
+    private Point(Long id, Long userId, long amount) {
+        this.id = id;
+        this.userId = userId;
+        this.amount = amount;
     }
 
-
-    /**
-     * 포인트 충전
-     */
-    public void charge(BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(PointErrorCode.CHARGE_AMOUNT_NEGATIVE);
-        }
-        this.balance = this.balance.add(amount);
-        this.updatedAt = LocalDateTime.now();
+    public static Point create(Long userId) {
+        return Point.builder()
+                .userId(userId)
+                .amount(INIT_POINT)
+                .build();
     }
 
-    /**
-     * 포인트 사용
-     */
-    public void use(BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(PointErrorCode.USE_AMOUNT_INVALID);
+    public void charge(long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("충전 금액은 0보다 커야 합니다.");
         }
-        if (this.balance.compareTo(amount) < 0) {
-            throw new BusinessException(PointErrorCode.INSUFFICIENT_BALANCE);
+
+        if (this.amount + amount > MAX_POINT) {
+            throw new IllegalArgumentException("최대 금액을 초과할 수 없습니다.");
         }
-        this.balance = this.balance.subtract(amount);
-        this.updatedAt = LocalDateTime.now();
+
+        this.amount += amount;
+    }
+
+    public void use(long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("사용 금액은 0보다 커야 합니다.");
+        }
+
+        if (this.amount < amount) {
+            throw new IllegalArgumentException("잔액이 부족합니다.");
+        }
+
+        this.amount -= amount;
     }
 }

@@ -38,6 +38,25 @@ dependencies {
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
 
+	//Lombok
+	compileOnly("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok")
+
+	// Swagger
+	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+
+	//QueryDSL
+	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+	implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
+	annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
+	// Redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+	// Redisson
+	implementation("org.redisson:redisson-spring-boot-starter:3.25.2")
+
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
@@ -49,4 +68,28 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 	systemProperty("user.timezone", "UTC")
+}
+
+// 생성된 Q클래스 경로 지정
+val querydslSrcDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
+
+// 소스 세트 설정
+sourceSets {
+	main {
+		java.srcDir(querydslSrcDir)
+	}
+}
+
+// JavaCompile 태스크 설정
+tasks.withType<JavaCompile>().configureEach {
+	options.annotationProcessorPath = configurations.annotationProcessor.get()
+
+	if (name == "compileJava") {
+		options.annotationProcessorGeneratedSourcesDirectory = querydslSrcDir
+	}
+}
+
+// clean 태스크 확장
+tasks.named<Delete>("clean") {
+	delete(querydslSrcDir)
 }

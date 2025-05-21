@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.application.point;
 
-import kr.hhplus.be.server.domain.point.PointHistory;
+import kr.hhplus.be.server.domain.point.PointTransaction;
 import kr.hhplus.be.server.domain.point.PointHistoryRepository;
-import kr.hhplus.be.server.domain.point.enums.PointHistoryType;
+import kr.hhplus.be.server.domain.point.enums.PointTransactionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -31,18 +30,18 @@ class PointHistoryServiceTest {
     void getHistoriesByUserId_returns_list() {
         // given
         Long userId = 1L;
-        List<PointHistory> mockHistories = List.of(
-                PointHistory.of(userId, PointHistoryType.CHARGE, BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.valueOf(1000)),
-                PointHistory.of(userId, PointHistoryType.USE, BigDecimal.valueOf(500), BigDecimal.valueOf(1000), BigDecimal.valueOf(500))
+        List<PointTransaction> mockHistories = List.of(
+                PointTransaction.of(userId, PointTransactionType.CHARGE, BigDecimal.valueOf(1000), BigDecimal.ZERO, BigDecimal.valueOf(1000)),
+                PointTransaction.of(userId, PointTransactionType.USE, BigDecimal.valueOf(500), BigDecimal.valueOf(1000), BigDecimal.valueOf(500))
         );
         given(pointHistoryRepository.findAllByUserId(userId)).willReturn(mockHistories);
 
         // when
-        List<PointHistory> result = pointHistoryService.getHistories(userId);
+        List<PointTransaction> result = pointHistoryService.getHistories(userId);
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getType()).isEqualTo(PointHistoryType.CHARGE);
-        assertThat(result.get(1).getType()).isEqualTo(PointHistoryType.USE);
+        assertThat(result.get(0).getType()).isEqualTo(PointTransactionType.CHARGE);
+        assertThat(result.get(1).getType()).isEqualTo(PointTransactionType.USE);
     }
 }
