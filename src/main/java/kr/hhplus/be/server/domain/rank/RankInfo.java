@@ -10,9 +10,18 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RankInfo {
 
-    public record PopularProduct(Long productId, Long totalScore) {
+    @Getter
+    public static class PopularProduct {
 
-    public static PopularProduct of(Long productId, Long totalScore) {
+        private final Long productId;
+        private final Long totalScore;
+
+        public PopularProduct(Long productId, Long totalScore) {
+            this.productId = productId;
+            this.totalScore = totalScore;
+        }
+
+        public static PopularProduct of(Long productId, Long totalScore) {
             return new PopularProduct(productId, totalScore);
         }
     }
@@ -32,7 +41,7 @@ public class RankInfo {
 
         public List<Long> getProductIds() {
             return products.stream()
-                    .map(PopularProduct::productId)
+                    .map(PopularProduct::getProductId)
                     .toList();
         }
     }
