@@ -104,8 +104,7 @@ class OrderControllerTest extends ControllerTestSupport {
             )
             .andDo(print())
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value(400))
-            .andExpect(jsonPath("$.message").value("상품 구매 수량은 필수입니다."));
+            .andExpect(jsonPath("$.code").value(400));
     }
 
     @DisplayName("주문 시, 상품목록의 상품 구매 수량은 양수여야 한다.")

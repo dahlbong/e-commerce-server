@@ -4,6 +4,7 @@ import kr.hhplus.be.server.supporters.IntegrationTestSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -45,8 +46,9 @@ class OrderRepositoryTest extends IntegrationTestSupport {
 
         // when & then
         assertThatThrownBy(() -> orderRepository.findById(orderId))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("주문이 존재하지 않습니다.");
+                .isInstanceOf(InvalidDataAccessApiUsageException.class)
+                .hasCauseInstanceOf(IllegalArgumentException.class)
+                .hasMessage("주문이 존재하지 않습니다.");
     }
 
     @DisplayName("주문 ID로 주문을 찾는다.")

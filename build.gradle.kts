@@ -35,6 +35,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
+	// Bean Validation (Hibernate Validator + Expression Language)
+	implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
+	implementation("org.glassfish:jakarta.el:4.0.2")
+
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
 
