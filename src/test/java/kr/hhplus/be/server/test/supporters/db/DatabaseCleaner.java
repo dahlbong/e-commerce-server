@@ -1,4 +1,4 @@
-package kr.hhplus.be.ecommerce.test.support.database;
+package kr.hhplus.be.server.test.supporters.db;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Entity;
