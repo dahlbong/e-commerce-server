@@ -1,9 +1,41 @@
 package kr.hhplus.be.server.domain.point;
 
-import java.math.BigDecimal;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public record PointCommand(Long userId, BigDecimal amount) {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class PointCommand {
 
-    public record Charge(Long userId, BigDecimal amount) {}
-    public record Use(Long userId, BigDecimal amount) {}
+    @Getter
+    public static class Charge {
+
+        private final Long userId;
+        private final Long amount;
+
+        private Charge(Long userId, Long amount) {
+            this.userId = userId;
+            this.amount = amount;
+        }
+
+        public static Charge of(Long userId, Long amount) {
+            return new Charge(userId, amount);
+        }
+    }
+
+    @Getter
+    public static class Use {
+
+        private final Long userId;
+        private final Long amount;
+
+        private Use(Long userId, Long amount) {
+            this.userId = userId;
+            this.amount = amount;
+        }
+
+        public static Use of(Long userId, Long amount) {
+            return new Use(userId, amount);
+        }
+    }
 }

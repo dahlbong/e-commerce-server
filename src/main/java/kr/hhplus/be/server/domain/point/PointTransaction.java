@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,36 +17,34 @@ public class PointTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "balance_id")
-    private Point balance;
+    private Long balanceId;
 
     @Enumerated(EnumType.STRING)
-    private PointTransactionType type;
+    private PointTransactionType transactionType;
 
-    private BigDecimal amount;
+    private long amount;
 
     @Builder
-    private PointTransaction(Long id, Point balance, PointTransactionType type, BigDecimal amount) {
+    private PointTransaction(Long id, Long balanceId, PointTransactionType transactionType, long amount) {
         this.id = id;
-        this.balance = balance;
-        this.type = type;
+        this.balanceId = balanceId;
+        this.transactionType = transactionType;
         this.amount = amount;
     }
 
-    public static PointTransaction ofCharge(Point balance, BigDecimal amount) {
+    public static PointTransaction ofCharge(Point balance, long amount) {
         return PointTransaction.builder()
-                .balance(balance)
-                .type(PointTransactionType.CHARGE)
+                .balanceId(balance.getId())
+                .transactionType(PointTransactionType.CHARGE)
                 .amount(amount)
                 .build();
     }
 
-    public static PointTransaction ofUse(Point balance, BigDecimal amount) {
+    public static PointTransaction ofUse(Point balance, long amount) {
         return PointTransaction.builder()
-                .balance(balance)
-                .type(PointTransactionType.USE)
-                .amount(amount.negate())
+                .balanceId(balance.getId())
+                .transactionType(PointTransactionType.USE)
+                .amount(-amount)
                 .build();
     }
 }

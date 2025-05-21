@@ -1,12 +1,9 @@
 package kr.hhplus.be.server.infra.order;
 
-import jakarta.persistence.EntityManager;
-import kr.hhplus.be.server.domain.order.OrderRepository;
-import kr.hhplus.be.server.domain.order.Order;
+import kr.hhplus.be.server.domain.order.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -14,7 +11,8 @@ import java.util.List;
 public class OrderRepositoryImpl implements OrderRepository {
 
     private final OrderJpaRepository orderJpaRepository;
-    private final EntityManager em;
+    private final OrderProductJpaRepository orderProductJpaRepository;
+    private final OrderQueryDslRepository orderQueryDslRepository;
 
     @Override
     public Order save(Order order) {
@@ -22,23 +20,18 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Order findById(Long id) {
-        return orderJpaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+    public Order findById(Long orderId) {
+        return orderJpaRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문이 존재하지 않습니다."));
     }
 
     @Override
-    public List<Object[]> findPopularProductIdsSince(LocalDateTime since, int limit) {
-        return em.createQuery("""
-                SELECT o.product.id, SUM(o.quantity)
-                FROM Order o
-                WHERE o.createdAt >= :since
-                GROUP BY o.product.id
-                ORDER BY SUM(o.quantity) DESC
-                """, Object[].class)
-                .setParameter("since", since)
-                .setMaxResults(5)
-                .getResultList();
+    public List<OrderProduct> findOrderIdsIn(List<Long> orderIds) {
+        return orderProductJpaRepository.findByOrderIdIn(orderIds);
     }
 
+    @Override
+    public List<OrderInfo.PaidProduct> findPaidProducts(OrderCommand.PaidProducts command) {
+        return orderQueryDslRepository.findPaidProducts(command);
+    }
 }

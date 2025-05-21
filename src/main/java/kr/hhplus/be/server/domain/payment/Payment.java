@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.payment;
 
-
 import jakarta.persistence.*;
 import kr.hhplus.be.server.domain.payment.enums.PaymentMethod;
 import kr.hhplus.be.server.domain.payment.enums.PaymentStatus;
@@ -12,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "balance", indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id")
+})
 public class Payment {
 
     @Id

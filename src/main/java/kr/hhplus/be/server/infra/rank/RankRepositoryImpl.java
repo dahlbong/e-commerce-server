@@ -1,12 +1,11 @@
 package kr.hhplus.be.server.infra.rank;
 
-import kr.hhplus.be.server.domain.rank.Rank;
-import kr.hhplus.be.server.domain.rank.RankCommand;
-import kr.hhplus.be.server.domain.rank.RankInfo;
-import kr.hhplus.be.server.domain.rank.RankRepository;
+import kr.hhplus.be.server.domain.rank.*;
+import kr.hhplus.be.server.domain.rank.enums.RankType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -14,15 +13,36 @@ import java.util.List;
 public class RankRepositoryImpl implements RankRepository {
 
     private final RankJpaRepository rankJpaRepository;
-    private final RankQueryDslRepository rankQueryDslRepository;
+    private final RankRedisRepository rankRedisRepository;
+    private final RankJdbcTemplateRepository rankJdbcTemplateRepository;
 
     @Override
     public Rank save(Rank rank) {
-        return rankJpaRepository.save(rank);
+        return rankRedisRepository.save(rank);
     }
 
     @Override
-    public List<RankInfo.PopularProduct> findPopularSellRanks(RankCommand.PopularSellRank command) {
-        return rankQueryDslRepository.findPopularSellRanks(command);
+    public List<RankInfo.PopularProduct> findPopularSellRanks(RankCommand.Query command) {
+        return rankRedisRepository.findPopularSellRanks(command);
+    }
+
+    @Override
+    public List<RankInfo.PopularProduct> findDailyRank(RankKey key) {
+        return rankRedisRepository.findDailyRank(key);
+    }
+
+    @Override
+    public List<Rank> findBy(RankType rankType, LocalDate date) {
+        return rankJpaRepository.findByRankTypeAndRankDate(rankType, date);
+    }
+
+    @Override
+    public void saveAll(List<Rank> ranks) {
+        rankJdbcTemplateRepository.batchInsert(ranks);
+    }
+
+    @Override
+    public boolean delete(RankKey key) {
+        return rankRedisRepository.delete(key);
     }
 }

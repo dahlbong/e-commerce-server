@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.application.coupon;
 
-import kr.hhplus.be.server.application.user.UserService;
+import kr.hhplus.be.server.domain.user.UserService;
 import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.coupon.Coupon;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
+import kr.hhplus.be.server.domain.coupon.CouponService;
 import kr.hhplus.be.server.domain.coupon.IssuedCoupon;
 import kr.hhplus.be.server.domain.coupon.IssuedCouponRepository;
 import kr.hhplus.be.server.domain.coupon.enums.CouponErrorCode;
@@ -31,7 +32,8 @@ class CouponServiceTest {
     @Mock IssuedCouponRepository issuedCouponRepository;
     @Mock UserService userService;
 
-    @InjectMocks CouponService couponService;
+    @InjectMocks
+    CouponService couponService;
 
     private Coupon coupon;
     private User user;
