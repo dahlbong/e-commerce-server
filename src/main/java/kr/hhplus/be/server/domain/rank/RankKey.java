@@ -1,14 +1,14 @@
 package kr.hhplus.be.server.domain.rank;
 
 import kr.hhplus.be.server.domain.rank.enums.RankType;
-import kr.hhplus.be.server.support.key.KeyGeneratable;
-import kr.hhplus.be.server.support.key.KeyType;
+import kr.hhplus.be.server.supporters.key.KeyGeneratable;
+import kr.hhplus.be.server.supporters.key.KeyType;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static kr.hhplus.be.server.support.key.KeyType.RANK;
+import static kr.hhplus.be.server.supporters.key.KeyType.RANK;
 
 public class RankKey implements KeyGeneratable {
 

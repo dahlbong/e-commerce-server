@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.user.userCoupon;
 
-import kr.hhplus.be.server.support.key.KeyGeneratable;
-import kr.hhplus.be.server.support.key.KeyType;
+import kr.hhplus.be.server.supporters.key.KeyGeneratable;
+import kr.hhplus.be.server.supporters.key.KeyType;
 
 import java.util.List;
 

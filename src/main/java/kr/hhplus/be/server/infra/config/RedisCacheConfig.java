@@ -2,8 +2,8 @@ package kr.hhplus.be.server.infra.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import kr.hhplus.be.server.support.cache.CacheType;
-import kr.hhplus.be.server.support.cache.Cacheable;
+import kr.hhplus.be.server.supporters.cache.CacheType;
+import kr.hhplus.be.server.supporters.cache.Cacheable;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;

@@ -2,8 +2,8 @@ package kr.hhplus.be.server.infra.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import kr.hhplus.be.server.support.cache.CacheTemplate;
-import kr.hhplus.be.server.support.cache.Cacheable;
+import kr.hhplus.be.server.supporters.cache.CacheTemplate;
+import kr.hhplus.be.server.supporters.cache.Cacheable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
