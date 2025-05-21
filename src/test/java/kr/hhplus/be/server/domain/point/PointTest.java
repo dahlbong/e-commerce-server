@@ -1,84 +1,99 @@
 package kr.hhplus.be.server.domain.point;
 
-import kr.hhplus.be.server.domain.point.enums.PointErrorCode;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PointTest {
 
-    @Nested
-    class charge {
-        @Test
-        @DisplayName("포인트 생성 시 초기 잔액이 올바르게 설정된다")
-        void createPoint_success() {
-            Point point = Point.of(1L, BigDecimal.valueOf(1000));
+    @DisplayName("충전 금액은 0보다 커야한다.")
+    @Test
+    void chargeWithNotPositiveAmount() {
+        // given
+        Point point = Point.create(1L);
 
-            assertThat(point.getUserId()).isEqualTo(1L);
-            assertThat(point.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(1000));
-        }
-
-        @Test
-        @DisplayName("포인트 생성 시 초기 잔액이 음수이면 INITIAL_BALANCE_NEGATIVE 에러 메시지를 던진다")
-        void createPoint_fail_negativeBalance() {
-            assertThatThrownBy(() -> Point.of(1L, BigDecimal.valueOf(-100)))
-                    .hasMessage(PointErrorCode.INITIAL_BALANCE_NEGATIVE.message());
-        }
-
-        @Test
-        @DisplayName("포인트 충전 시 잔액이 정상적으로 증가한다")
-        void chargePoint_success() {
-            Point point = Point.of(1L, BigDecimal.valueOf(1000));
-            point.charge(BigDecimal.valueOf(500));
-
-            assertThat(point.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(1500));
-        }
-
-        @Test
-        @DisplayName("포인트 충전 시 0 이하의 금액이면 CHARGE_AMOUNT_INVALID 에러 메시지를 던진다")
-        void chargePoint_fail_zeroOrNegative() {
-            Point point = Point.of(1L, BigDecimal.valueOf(1000));
-
-            assertThatThrownBy(() -> point.charge(BigDecimal.ZERO))
-                    .hasMessage(PointErrorCode.CHARGE_AMOUNT_NEGATIVE.message());
-
-            assertThatThrownBy(() -> point.charge(BigDecimal.valueOf(-100)))
-                    .hasMessage(PointErrorCode.CHARGE_AMOUNT_NEGATIVE.message());;
-        }
+        // when & then
+        assertThatThrownBy(() -> point.charge(0L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("충전 금액은 0보다 커야 합니다.");
     }
 
-    @Nested
-    class use {
-        @Test
-        @DisplayName("포인트 사용 시 잔액이 정상적으로 차감된다")
-        void usePoint_success() {
-            Point point = Point.of(1L, BigDecimal.valueOf(1000));
-            point.use(BigDecimal.valueOf(300));
+    @DisplayName("충전 최대 금액을 넘을 수 없다.")
+    @Test
+    void chargeCannotExceedMaxAmount() {
+        // given
+        Point point = Point.builder()
+            .userId(1L)
+            .amount(10_000_000L)
+            .build();
 
-            assertThat(point.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(700));
-        }
-
-        @Test
-        @DisplayName("포인트 사용 시 잔액보다 큰 금액을 사용하면 INSUFFICIENT_BALANCE 에러 메시지를 던진다")
-        void usePoint_fail_insufficientBalance() {
-            Point point = Point.of(1L, BigDecimal.valueOf(300));
-
-            assertThatThrownBy(() -> point.use(BigDecimal.valueOf(500)))
-                    .hasMessage(PointErrorCode.INSUFFICIENT_BALANCE.message());
-        }
-
-        @Test
-        @DisplayName("포인트 사용 시 0 이하의 금액을 사용하면 USE_AMOUNT_INVALID 에러 메시지를 던진다")
-        void usePoint_fail_zeroOrNegativeAmount() {
-            Point point = Point.of(1L, BigDecimal.valueOf(1000));
-
-            assertThatThrownBy(() -> point.use(BigDecimal.valueOf(-50)))
-                    .hasMessage(PointErrorCode.USE_AMOUNT_INVALID.message());
-        }
+        // when & then
+        assertThatThrownBy(() -> point.charge(1L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("최대 금액을 초과할 수 없습니다.");
     }
 
+    @DisplayName("잔액을 충전한다.")
+    @Test
+    void charge() {
+        // given
+        Point point = Point.builder()
+            .userId(1L)
+            .amount(1_000_000L)
+            .build();
+
+        // when
+        point.charge(1_000_000L);
+
+        // then
+        assertThat(point.getAmount()).isEqualTo(2_000_000L);
+    }
+
+    @DisplayName("사용 금액은 0보다 커야한다.")
+    @Test
+    void useWithNotPositiveAmount() {
+        // given
+        Point point = Point.builder()
+            .userId(1L)
+            .amount(1_000_000L)
+            .build();
+
+        // when & then
+        assertThatThrownBy(() -> point.use(0L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("사용 금액은 0보다 커야 합니다.");
+    }
+
+    @DisplayName("잔고가 부족할 경우 차감할 수 없다.")
+    @Test
+    void useCannotInsufficientAmount() {
+        // given
+        Point point = Point.builder()
+            .userId(1L)
+            .amount(1_000_000L)
+            .build();
+
+        // when & then
+        assertThatThrownBy(() -> point.use(1_000_001L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("잔액이 부족합니다.");
+    }
+
+    @DisplayName("잔고를 차감한다.")
+    @Test
+    void use() {
+        // given
+        Point point = Point.builder()
+            .userId(1L)
+            .amount(1_000_000L)
+            .build();
+
+        // when
+        point.use(1_000_000L);
+
+        // then
+        assertThat(point.getAmount()).isZero();
+    }
 }

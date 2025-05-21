@@ -35,6 +35,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
+	// Bean Validation (Hibernate Validator + Expression Language)
+	implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
+	implementation("org.glassfish:jakarta.el:4.0.2")
+
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
 
@@ -63,6 +67,12 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// RestAssured
+	testImplementation("io.rest-assured:rest-assured:5.3.1")
+
+	// RestDocs
+	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
 tasks.withType<Test> {

@@ -1,59 +1,73 @@
 package kr.hhplus.be.server.domain.product;
 
-import kr.hhplus.be.server.domain.product.enums.ProductErrorCode;
 import kr.hhplus.be.server.domain.product.enums.SellingStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import java.math.BigDecimal;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ProductTest {
 
+    @DisplayName("상품 생성 시, 이름은 필수이다.")
     @Test
-    @DisplayName("상품이 정상적으로 생성된다")
-    void createProduct_success() {
-        Product product = Product.of(
-                "올리브영 토너",
-                SellingStatus.SELLING,
-                BigDecimal.valueOf(8900), 1
-        );
-
-        assertThat(product.getName()).isEqualTo("올리브영 토너");
-        assertThat(product.getPrice()).isEqualByComparingTo("8900");
-        assertThat(product.getSellingStatus()).isEqualTo(SellingStatus.SELLING);
-        assertThat(product.getCreatedAt()).isNotNull();
-        assertThat(product.getUpdatedAt()).isNotNull();
+    void createWithoutName() {
+        // when & then
+        assertThatThrownBy(() -> Product.create(null, 1_000L, SellingStatus.SELLING))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("상품 이름은 필수입니다.");
     }
 
+    @DisplayName("상품 생성 시, 가격은 0보다 커야 한다.")
     @Test
-    @DisplayName("상품 이름이 비어 있으면 NAME_SHOULD_NOT_BE_BLANK 예외메시지를 던진다.")
-    void createProduct_fail_blankName() {
-        assertThatThrownBy(() ->
-                Product.of("  ", SellingStatus.SELLING, BigDecimal.valueOf(10000), 1))
-                .hasMessage(ProductErrorCode.NAME_SHOULD_NOT_BE_BLANK.message());
+    void createWithInvalidPrice() {
+        // when & then
+        assertThatThrownBy(() -> Product.create("쿠폰명", 0L, SellingStatus.SELLING))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("상품 가격은 0보다 커야 합니다.");
     }
 
+    @DisplayName("상품 생성 시, 판매 상태는 필수이다.")
     @Test
-    @DisplayName("상품 가격이 0 이하이면 PRICE_SHOULD_BE_POSITIVE 예외메시지를 던진다.")
-    void createProduct_fail_invalidPrice() {
-        assertThatThrownBy(() ->
-                Product.of("상품", SellingStatus.SELLING, BigDecimal.ZERO, 1))
-                .hasMessage(ProductErrorCode.PRICE_SHOULD_BE_POSITIVE.message());
+    void createWithoutSellStatus() {
+        // when & then
+        assertThatThrownBy(() -> Product.create("쿠폰명", 1_000L, null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("상품 판매 상태는 필수입니다.");
     }
 
-    @Test
-    @DisplayName("판매 상태가 SELLING이면 isSelling은 true를 반환한다")
-    void isSelling_returns_true_when_selling() {
-        Product product = Product.of("상품", SellingStatus.SELLING, BigDecimal.valueOf(10000), 1);
-        assertThat(product.isSelling()).isTrue();
+    @DisplayName("판매 중이지 않는 상품인지 확인한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"HOLD", "STOP_SELLING"})
+    void cannotSelling(SellingStatus status) {
+        // given
+        Product product = Product.builder()
+            .sellStatus(status)
+            .build();
+
+        // when
+        boolean result = product.cannotSelling();
+
+        // then
+        assertThat(result).isTrue();
     }
 
-    @Test
-    @DisplayName("판매 상태가 STOPPED이면 isSelling은 false를 반환한다")
-    void isSelling_returns_false_when_stopped() {
-        Product product = Product.of("상품", SellingStatus.STOPPED, BigDecimal.valueOf(10000), 1);
-        assertThat(product.isSelling()).isFalse();
+    @DisplayName("판매 중인 상품인지 확인한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"SELLING"})
+    void canSelling(SellingStatus status) {
+        // given
+        Product product = Product.builder()
+            .sellStatus(status)
+            .build();
+
+        // when
+        boolean result = product.cannotSelling();
+
+        // then
+        assertThat(result).isFalse();
     }
+
 }

@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.infra.lock;
 
-import kr.hhplus.be.server.support.lock.DefaultLockTemplate;
-import kr.hhplus.be.server.support.lock.LockIdHolder;
-import kr.hhplus.be.server.support.lock.LockStrategy;
+import kr.hhplus.be.server.supporters.lock.DefaultLockTemplate;
+import kr.hhplus.be.server.supporters.lock.LockIdHolder;
+import kr.hhplus.be.server.supporters.lock.LockStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;

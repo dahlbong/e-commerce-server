@@ -26,6 +26,9 @@ public class Point {
 
     private long amount;
 
+    @Version
+    private Long version;
+
     @Builder
     private Point(Long id, Long userId, long amount) {
         this.id = id;

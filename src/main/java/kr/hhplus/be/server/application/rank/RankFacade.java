@@ -9,7 +9,7 @@ import kr.hhplus.be.server.domain.product.ProductService;
 import kr.hhplus.be.server.domain.rank.RankCommand;
 import kr.hhplus.be.server.domain.rank.RankInfo;
 import kr.hhplus.be.server.domain.rank.RankService;
-import kr.hhplus.be.server.support.cache.CacheType;
+import kr.hhplus.be.server.supporters.cache.CacheType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;

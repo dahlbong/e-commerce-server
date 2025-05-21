@@ -1,39 +1,94 @@
 package kr.hhplus.be.server.domain.order;
 
-import kr.hhplus.be.server.domain.BusinessException;
-import kr.hhplus.be.server.domain.order.enums.OrderErrorCode;
-import kr.hhplus.be.server.domain.product.Product;
-import kr.hhplus.be.server.domain.product.enums.SellingStatus;
+import kr.hhplus.be.server.domain.order.enums.OrderStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderTest {
 
-    private Product createProduct(String name, BigDecimal price) {
-        return Product.of(name, SellingStatus.SELLING, price, 50);
-    }
-
+    @DisplayName("주문 상품이 없는 주문을 생성할 수 없다.")
     @Test
-    @DisplayName("총 결제 금액은 수량 * 단가 - 할인금액으로 계산된다")
-    void calculateTotalPrice_success() {
-        Product product = createProduct("상품A", BigDecimal.valueOf(10000));
-        Order order = Order.of(1L, product, 2);
-        order.applyDiscount(BigDecimal.valueOf(2000));
-
-        assertThat(order.calculateTotalPrice()).isEqualByComparingTo("18000");
+    void createWithoutOrderProducts() {
+        // when & then
+        assertThatThrownBy(() -> Order.create(1L, null, 0.0, null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("주문 상품이 없습니다.");
     }
 
+    @DisplayName("주문 상품이 비어있는 주문을 생성할 수 없다.")
     @Test
-    @DisplayName("0 이하의 수량은 QUANTITY_SHOULD_BE_POSITIVE 예외를 던진다")
-    void zero_quantity_should_throw() {
-        Product product = createProduct("상품A", BigDecimal.valueOf(1000));
-
-        assertThatThrownBy(() -> Order.of(1L, product, 0))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(OrderErrorCode.QUANTITY_SHOULD_BE_POSITIVE.message());
+    void createEmptyOrderProducts() {
+        // when & then
+        assertThatThrownBy(() -> Order.create(1L, null, 0.0, List.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("주문 상품이 없습니다.");
     }
+
+    @DisplayName("할인이 없는 주문을 생성한다.")
+    @Test
+    void createWithoutDiscount() {
+        // given
+        List<OrderProduct> orderProducts = List.of(
+            OrderProduct.create(1L, "상품명1", 1000, 1),
+            OrderProduct.create(2L, "상품명2", 2000, 2),
+            OrderProduct.create(3L, "상품명3", 3000, 3),
+            OrderProduct.create(4L, "상품명4", 4000, 4)
+        );
+
+        // when
+        Order order = Order.create(1L, null, 0.0, orderProducts);
+
+        // then
+        assertThat(order.getDiscountPrice()).isZero();
+        assertThat(order.getTotalPrice()).isEqualTo(1000 + 2000 * 2 + 3000 * 3 + 4000 * 4);
+    }
+
+    @DisplayName("할인이 있는 주문을 생성한다.")
+    @Test
+    void createWithDiscount() {
+        // given
+        List<OrderProduct> orderProducts = List.of(
+            OrderProduct.create(1L, "상품명1", 1000, 1),
+            OrderProduct.create(2L, "상품명2", 2000, 2),
+            OrderProduct.create(3L, "상품명3", 3000, 3),
+            OrderProduct.create(4L, "상품명4", 4000, 4)
+        );
+
+        // when
+        Order order = Order.create(1L, 2L, 0.1, orderProducts);
+
+        // then
+        long expectedTotalPrice = 1000 + 2000 * 2 + 3000 * 3 + 4000 * 4;
+        long expectedDiscountPrice = (long) (expectedTotalPrice * 0.1);
+        assertThat(order.getDiscountPrice()).isEqualTo(expectedDiscountPrice);
+        assertThat(order.getTotalPrice()).isEqualTo(expectedTotalPrice - expectedDiscountPrice);
+    }
+
+    @DisplayName("주문을 결제 완료한다.")
+    @Test
+    void paid() {
+        // given
+        List<OrderProduct> orderProducts = List.of(
+            OrderProduct.create(1L, "상품명1", 1000, 1),
+            OrderProduct.create(2L, "상품명2", 2000, 2),
+            OrderProduct.create(3L, "상품명3", 3000, 3),
+            OrderProduct.create(4L, "상품명4", 4000, 4)
+        );
+
+        Order order = Order.create(1L, null, 0.0, orderProducts);
+
+        // when
+        order.paid(LocalDateTime.now());
+
+        // then
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.PAID);
+        assertThat(order.getPaidAt()).isNotNull();
+    }
+
 }

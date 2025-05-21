@@ -1,39 +1,38 @@
 package kr.hhplus.be.server.infra.coupon;
 
-import kr.hhplus.be.server.domain.BusinessException;
 import kr.hhplus.be.server.domain.coupon.Coupon;
-import kr.hhplus.be.server.domain.coupon.enums.CouponErrorCode;
 import kr.hhplus.be.server.domain.coupon.CouponRepository;
 import kr.hhplus.be.server.domain.coupon.enums.CouponStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class CouponRepositoryImpl implements CouponRepository {
 
-    private final CouponJpaRepository jpa;
+    private final CouponJpaRepository couponJpaRepository;
 
     @Override
-    public Coupon findById(Long id) {
-        return jpa.findById(id)
-                .orElseThrow(() -> new BusinessException(CouponErrorCode.NOT_FOUND_COUPON));
+    public Coupon save(Coupon coupon) {
+        return couponJpaRepository.save(coupon);
     }
 
     @Override
-    public void save(Coupon coupon) {
-        jpa.save(coupon);
+    public Coupon findById(Long couponId) {
+        return couponJpaRepository.findById(couponId)
+                .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다."));
     }
 
     @Override
     public Coupon findByIdWithLock(Long couponId) {
-        return jpa.findByIdWithLock(couponId);
+        return couponJpaRepository.findByIdWithLock(couponId)
+                .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다."));
     }
 
     @Override
     public List<Coupon> findByStatus(CouponStatus status) {
-        return jpa.findByStatus(status);
+        return couponJpaRepository.findByStatus(status);
     }
 }

@@ -22,8 +22,8 @@ public class OrderRequest {
         private Long userId;
         private Long couponId;
 
-        @Valid
         @NotEmpty(message = "상품 목록은 1개 이상이여야 합니다.")
+        @Valid
         private List<OrderProduct> products;
 
         private OrderPayment(Long userId, Long couponId, List<OrderProduct> products) {
