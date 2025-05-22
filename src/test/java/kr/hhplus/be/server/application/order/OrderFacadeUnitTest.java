@@ -100,7 +100,7 @@ class OrderFacadeUnitTest extends MockTestSupport {
         inOrder.verify(userCouponService, times(1)).useUserCoupon(mockUsableCoupon.getUserCouponId());
         inOrder.verify(stockService, times(1)).deductStock(criteria.toStockCommand());
         inOrder.verify(paymentService, times(1)).pay(criteria.toPaymentCommand(mockOrder));
-        inOrder.verify(orderService, times(1)).paidOrder(mockOrder.getOrderId());
+        inOrder.verify(orderService, times(1)).payOrder(mockOrder.getOrderId());
         inOrder.verify(rankService, times(1)).createSellRank(criteria.toRankCommand(any()));
     }
 }

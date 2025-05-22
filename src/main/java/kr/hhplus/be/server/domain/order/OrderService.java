@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.order;
 
 import kr.hhplus.be.server.domain.order.enums.OrderStatus;
+import kr.hhplus.be.server.domain.order.event.OrderPayEvent;
+import kr.hhplus.be.server.domain.order.event.OrderPayEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderExternalClient orderExternalClient;
+    private final OrderPayEventPublisher orderPayEventPublisher;
 
     public OrderInfo.Order createOrder(OrderCommand.Create command) {
         List<OrderProduct> orderProducts = command.getProducts().stream()
@@ -25,11 +28,18 @@ public class OrderService {
         return OrderInfo.Order.of(order.getId(), order.getTotalPrice(), order.getDiscountPrice());
     }
 
-    public void paidOrder(Long orderId) {
+    public void payOrder(Long orderId) {
         Order order = orderRepository.findById(orderId);
         order.paid(LocalDateTime.now());
 
-        orderExternalClient.sendOrderMessage(order);
+        OrderPayEvent event = OrderPayEvent.builder()
+                .orderId(order.getId())
+                .userId(order.getUserId())
+                .totalPrice(order.getTotalPrice())
+                .discountPrice(order.getDiscountPrice())
+                .build();
+
+        orderPayEventPublisher.publishOrderPayEvent(event);
     }
 
     public OrderInfo.PaidProducts getPaidProducts(OrderCommand.DateQuery command) {
