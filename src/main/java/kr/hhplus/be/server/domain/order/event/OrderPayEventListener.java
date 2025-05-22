@@ -24,7 +24,7 @@ public class OrderPayEventListener {
      */
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleOrderEvent(OrderPayEvent event) {
+    public void handleOrderPayEvent(OrderPayEvent event) {
         try {
             log.info("주문 결제 완료 이벤트 처리 시작: orderId={}", event.getOrderId());
 
