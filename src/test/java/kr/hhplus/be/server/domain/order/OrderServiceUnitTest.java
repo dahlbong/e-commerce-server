@@ -54,14 +54,14 @@ class OrderServiceUnitTest extends MockTestSupport {
             .thenThrow(new IllegalArgumentException("주문이 존재하지 않습니다."));
 
         // when
-        assertThatThrownBy(() -> orderService.paidOrder(1L))
+        assertThatThrownBy(() -> orderService.payOrder(1L))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("주문이 존재하지 않습니다.");
     }
 
     @DisplayName("주문을 결제한다. 결제 완료 시, 외부 데이터 플랫폼으로 주문정보를 전송한다.")
     @Test
-    void paidOrder() {
+    void payOrder() {
         // given
         Order order = Order.create(1L,
             1L,
@@ -75,7 +75,7 @@ class OrderServiceUnitTest extends MockTestSupport {
             .thenReturn(order);
 
         // when
-        orderService.paidOrder(1L);
+        orderService.payOrder(1L);
 
         // then
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.PAID);

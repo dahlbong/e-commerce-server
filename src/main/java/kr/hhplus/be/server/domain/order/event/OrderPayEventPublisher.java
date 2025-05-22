@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class OrderEventPublisher {
+public class OrderPayEventPublisher {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void publishOrderEvent(OrderEvent event) {
+    public void publishOrderPayEvent(OrderPayEvent event) {
         applicationEventPublisher.publishEvent(event);
     }
 }

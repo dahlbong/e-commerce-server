@@ -13,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OrderEventListener {
+public class OrderPayEventListener {
 
     private final OrderExternalClient orderExternalClient;
     private final OrderRepository orderRepository;
@@ -24,7 +24,7 @@ public class OrderEventListener {
      */
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleOrderEvent(OrderEvent event) {
+    public void handleOrderEvent(OrderPayEvent event) {
         try {
             log.info("주문 결제 완료 이벤트 처리 시작: orderId={}", event.getOrderId());
 
@@ -45,7 +45,7 @@ public class OrderEventListener {
      */
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleOrderEventForNotification(OrderEvent event) {
+    public void handleOrderEventForNotification(OrderPayEvent event) {
         try {
             log.info("결제 완료 알림톡 발송 시작: orderId={}", event.getOrderId());
             log.info("결제 완료 알림톡 발송 완료: orderId={}, userId={}, amount={}",

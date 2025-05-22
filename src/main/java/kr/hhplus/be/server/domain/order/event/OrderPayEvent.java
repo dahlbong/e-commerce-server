@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderEvent {
+public class OrderPayEvent {
 
     private Long orderId;
     private Long userId;
@@ -15,7 +15,7 @@ public class OrderEvent {
     private long discountPrice;
 
     @Builder
-    private OrderEvent(Long orderId, Long userId, long totalPrice, long discountPrice) {
+    private OrderPayEvent(Long orderId, Long userId, long totalPrice, long discountPrice) {
         this.orderId = orderId;
         this.userId = userId;
         this.totalPrice = totalPrice;
