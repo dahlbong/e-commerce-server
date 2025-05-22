@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
-class OrderEventIntegrationTest extends IntegrationTestSupport {
+class OrderPayEventIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
     private OrderService orderService;
