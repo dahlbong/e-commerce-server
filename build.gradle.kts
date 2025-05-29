@@ -46,6 +46,9 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 
+	testCompileOnly("org.projectlombok:lombok")
+	testAnnotationProcessor("org.projectlombok:lombok")
+
 	// Swagger
 	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
@@ -60,6 +63,13 @@ dependencies {
 
 	// Redisson
 	implementation("org.redisson:redisson-spring-boot-starter:3.25.2")
+
+	// Kafka
+	implementation("org.springframework.kafka:spring-kafka")
+
+	// Kafka Testcontainers
+	testImplementation("org.testcontainers:kafka")
+	testImplementation("org.springframework.kafka:spring-kafka-test")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

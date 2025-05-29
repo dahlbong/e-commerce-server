@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order.event;
 
+import kr.hhplus.be.server.domain.order.Order;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,5 +21,14 @@ public class OrderPayEvent {
         this.userId = userId;
         this.totalPrice = totalPrice;
         this.discountPrice = discountPrice;
+    }
+
+    public static OrderPayEvent of(Order order) {
+        return OrderPayEvent.builder()
+                .orderId(order.getId())
+                .userId(order.getUserId())
+                .totalPrice(order.getTotalPrice())
+                .discountPrice(order.getDiscountPrice())
+                .build();
     }
 }
