@@ -43,7 +43,7 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
 
     @DisplayName("주문을 결제완료처리 한다.")
     @Test
-    void paidOrder() {
+    void payOrder() {
         // given
         Order order = Order.create(1L, 1L, 0.1, List.of(
             OrderProduct.create(1L, "상품1", 10_000L, 2),
@@ -52,7 +52,7 @@ class OrderServiceIntegrationTest extends IntegrationTestSupport {
         orderRepository.save(order);
 
         // when
-        orderService.paidOrder(order.getId());
+        orderService.payOrder(order.getId());
 
         // then
         Order result = orderRepository.findById(order.getId());

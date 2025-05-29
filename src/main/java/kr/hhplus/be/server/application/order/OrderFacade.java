@@ -60,7 +60,7 @@ public class OrderFacade {
         optionalUsableCoupon.ifPresent(coupon -> userCouponService.useUserCoupon(coupon.getUserCouponId()));
         stockService.deductStock(criteria.toStockCommand());
         paymentService.pay(criteria.toPaymentCommand(order));
-        orderService.paidOrder(order.getOrderId());
+        orderService.payOrder(order.getOrderId());
         rankService.createSellRank(criteria.toRankCommand(LocalDate.now()));
 
         return OrderResult.Order.of(order);
