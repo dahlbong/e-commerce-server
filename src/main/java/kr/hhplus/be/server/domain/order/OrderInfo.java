@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.order;
 
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +22,8 @@ public class OrderInfo {
             this.discountPrice = discountPrice;
         }
 
-        public static Order of(Long orderId, long totalPrice, long discountPrice) {
-            return new Order(orderId, totalPrice, discountPrice);
+        public static Order from(kr.hhplus.be.server.domain.order.Order order) {
+            return new Order(order.getId(), order.getTotalPrice(), order.getDiscountPrice());
         }
     }
 

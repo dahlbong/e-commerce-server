@@ -5,6 +5,8 @@ import kr.hhplus.be.server.domain.order.event.OrderPayEvent;
 import kr.hhplus.be.server.domain.order.event.OrderPayEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +27,15 @@ public class OrderService {
         Order order = Order.create(command.getUserId(), command.getUserCouponId(), command.getDiscountRate(), orderProducts);
         orderRepository.save(order);
 
-        return OrderInfo.Order.of(order.getId(), order.getTotalPrice(), order.getDiscountPrice());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                orderPayEventPublisher.publishOrderPayEvent(OrderPayEvent.of(order));
+                orderExternalClient.sendOrderMessage(order);
+            }
+        });
+
+        return OrderInfo.Order.from(order);
     }
 
     public void payOrder(Long orderId) {
