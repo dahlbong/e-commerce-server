@@ -4,19 +4,20 @@ import kr.hhplus.be.server.domain.order.enums.OrderStatus;
 import kr.hhplus.be.server.domain.order.event.OrderPayEvent;
 import kr.hhplus.be.server.domain.order.event.OrderPayEventPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderExternalClient orderExternalClient;
     private final OrderPayEventPublisher orderPayEventPublisher;
 
     public OrderInfo.Order createOrder(OrderCommand.Create command) {
@@ -27,13 +28,10 @@ public class OrderService {
         Order order = Order.create(command.getUserId(), command.getUserCouponId(), command.getDiscountRate(), orderProducts);
         orderRepository.save(order);
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                orderPayEventPublisher.publishOrderPayEvent(OrderPayEvent.of(order));
-                orderExternalClient.sendOrderMessage(order);
-            }
-        });
+        log.info("OrderPayEvent 발행 시작");
+        OrderPayEvent event = OrderPayEvent.of(order);
+        orderPayEventPublisher.publishOrderPayEvent(event);
+        log.info("OrderPayEvent 발행 완료");
 
         return OrderInfo.Order.from(order);
     }
